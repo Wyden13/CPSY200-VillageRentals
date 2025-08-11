@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using VillageRentalManagementSystem.Components.Models;
+using VillageRentalManagementSystem.Models;
 
 namespace VillageRentalManagementSystem.Models
 {
-    internal class Rental
+    public class Rental
     {
         public int Id { get; set; }
         public Customer customer;
@@ -24,5 +24,17 @@ namespace VillageRentalManagementSystem.Models
             this.customer = customer;
             this.items = items;
         }
+
+        public double CalculateTotalCost()
+        {
+            double totalCost = 0;
+            foreach (RentalItem item in items)
+            {
+                totalCost += item.rentalCost;
+            }
+            return totalCost;
+        }
+
+        public void AddRentalItem(RentalItem item) { items.Add(item); }
     }
 }

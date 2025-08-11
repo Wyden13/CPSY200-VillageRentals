@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using VillageRentalManagementSystem.Components.Models;
+using VillageRentalManagementSystem.Models;
 
 namespace VillageRentalManagementSystem.Services
 {
-    internal class EquipmentServices
+    internal class EquipmentService
     {
-        List<Equipment> equipmentList;
+        List<Equipment> equipmentList = new List<Equipment>();
 
         public void AddEquipment(Equipment equipment) { equipmentList.Add(equipment); }
 
@@ -20,9 +20,10 @@ namespace VillageRentalManagementSystem.Services
             foreach (Equipment equipmentItem in equipmentList) {
                 if (equipmentItem.Equals(equipment))
                 {
-                    return equipmentItem.
+                    return equipment.IsAvailable;
                 }
             }
+            return false;
         }
 
     }

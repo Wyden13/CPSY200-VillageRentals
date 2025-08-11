@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace VillageRentalManagementSystem.Models
 {
-    internal class RentalItem
+    public class RentalItem
     {
         public Equipment equipment;
         public DateTime rentalDate;

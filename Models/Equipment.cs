@@ -3,20 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using VillageRentalManagementSystem.Components.Models;
+using VillageRentalManagementSystem.Models;
 
 namespace VillageRentalManagementSystem.Models
 {
-    internal class Equipment
+    public class Equipment
     {
         public int Id {  get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public double DailyRentalCost { get; set; }
-        public bool IsAvailable { get; set; }
+        public bool IsAvailable {  get; set; }
         public Category Category;
-
-
         public Equipment(int id, string name, string description, double dailyRentalCost, bool isAvailable, Category category) : this(id, name, description, dailyRentalCost, isAvailable)
         {
             Category = category;
@@ -34,5 +32,6 @@ namespace VillageRentalManagementSystem.Models
         public Equipment()
         {
         }
+
     }
 }
