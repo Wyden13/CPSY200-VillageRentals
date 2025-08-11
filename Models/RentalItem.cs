@@ -1,0 +1,17 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace VillageRentalManagementSystem.Models
+{
+    internal class RentalItem
+    {
+        public Equipment equipment;
+        public DateTime rentalDate;
+        public DateTime returnDAte;
+        public double rentalCost;
+
+    }
+}
