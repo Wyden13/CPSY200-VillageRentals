@@ -13,5 +13,16 @@ namespace VillageRentalManagementSystem.Models
         public DateTime returnDAte;
         public double rentalCost;
 
+        public RentalItem()
+        {
+        }
+
+        public RentalItem(Equipment equipment, DateTime rentalDate, DateTime returnDAte, double rentalCost)
+        {
+            this.equipment = equipment;
+            this.rentalDate = rentalDate;
+            this.returnDAte = returnDAte;
+            this.rentalCost = rentalCost;
+        }
     }
 }

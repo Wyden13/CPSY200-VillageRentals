@@ -13,5 +13,16 @@ namespace VillageRentalManagementSystem.Models
         public Customer customer;
         
         List<RentalItem> items;
+
+        public Rental()
+        {
+        }
+
+        public Rental(int id, Customer customer, List<RentalItem> items)
+        {
+            Id = id;
+            this.customer = customer;
+            this.items = items;
+        }
     }
 }
