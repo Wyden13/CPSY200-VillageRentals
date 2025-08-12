@@ -2,14 +2,16 @@
 @using VillageRentalManagementSystem.Models
 @using VillageRentalManagementSystem.Services
 @inject NavigationManager navigationManager
+@inject CustomerService customerService
+@inject RentalService rentalService
 
 <div class="form-group mb-3">
     <div class="">
         <label class="form-label"> First Name:</label>
         <select class="form-select">
-            @foreach (Patient patient in appointmentManager.patients)
+            @foreach (Customer customer in customerService.customers)
             {
-                <option value="@patient.Id">@patient.FirstName, @patient.LastName</option>
+                <option value="@customer.Id">@customer.FirstName, @customer.LastName</option>
             }
         </select>
     </div>
