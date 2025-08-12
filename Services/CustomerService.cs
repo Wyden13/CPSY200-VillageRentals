@@ -14,5 +14,12 @@ namespace VillageRentalManagementSystem.Services
         public void AddCustomer(Customer customer) { customers.Add(customer); }
         public void RemoveCustomer(Customer customer) {customers.Remove(customer); }
 
+        public Customer FindCustomer(String firstName)
+        {
+            foreach (Customer customer in customers) { 
+                if(customer.FirstName.Contains(firstName, StringComparison.CurrentCultureIgnoreCase)) return customer;
+            }
+            return null;
+        }
     }
 }

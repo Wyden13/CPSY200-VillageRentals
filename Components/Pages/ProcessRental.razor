@@ -1,0 +1,20 @@
+﻿@page "/processrental"
+@using VillageRentalManagementSystem.Models
+@using VillageRentalManagementSystem.Services
+@inject NavigationManager navigationManager
+
+<div class="form-group mb-3">
+    <div class="">
+        <label class="form-label"> First Name:</label>
+        <select class="form-select">
+            @foreach (Patient patient in appointmentManager.patients)
+            {
+                <option value="@patient.Id">@patient.FirstName, @patient.LastName</option>
+            }
+        </select>
+    </div>
+</div>
+
+@code {
+    
+}
