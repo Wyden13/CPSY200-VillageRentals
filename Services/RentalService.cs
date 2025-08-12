@@ -37,17 +37,14 @@ namespace VillageRentalManagementSystem.Services
                         command.Parameters.AddWithValue("@CustomerId", rental.customer.Id);
                         command.Parameters.AddWithValue("@RentalDate", DateTime.Now);
                         command.Parameters.AddWithValue("@TotalCost", rental.CalculateTotalCost());
-
-                        // Use ExecuteScalarAsync because we expect a single value back (the new ID).
+.
                         var result = await command.ExecuteScalarAsync();
                         newRentalId = Convert.ToInt32(result);
-                        rental.Id = newRentalId; // Assign the new ID back to our object.
+                        rental.Id = newRentalId; 
                     }
 
-                    // STEP 2: Loop through each item in the shopping cart and process it.
                     foreach (var item in rental.items)
                     {
-                        // STEP 2a: Insert a record into the 'RentalItems' linking table.
                         var rentalItemInsertQuery = @"
                             INSERT INTO RentalItems (RentalId, EquipmentId, RentalCost) 
                             VALUES (@RentalId, @EquipmentId, @RentalCost)";
@@ -60,7 +57,6 @@ namespace VillageRentalManagementSystem.Services
                             await command.ExecuteNonQueryAsync();
                         }
 
-                        // STEP 2b: Update the equipment's status to make it unavailable.
                         var equipmentUpdateQuery = "UPDATE Equipment SET IsAvailable = 0 WHERE Id = @EquipmentId";
                         using (var command = new SqlCommand(equipmentUpdateQuery, connection, transaction))
                         {
@@ -68,18 +64,14 @@ namespace VillageRentalManagementSystem.Services
                             await command.ExecuteNonQueryAsync();
                         }
                     }
-
-                    // If all the above commands executed without any errors,
-                    // 'Commit' the transaction to save all the changes permanently.
                     transaction.Commit();
                     return true;
                 }
                 catch (Exception ex)
                 {
-                    // If ANY error occurred during the 'try' block, we immediately jump here.
                     Console.WriteLine($"An error occurred: {ex.Message}");
 
-                    // 'Rollback' the transaction. This undoes ALL the changes made since
+                    // 'Rollback' undoes ALL the changes made since
                     // we started the transaction, leaving the database in a clean state.
                     transaction.Rollback();
                     return false;
