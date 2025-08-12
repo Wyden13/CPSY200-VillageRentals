@@ -1,22 +1,78 @@
-﻿@page "/processrental"
-@using VillageRentalManagementSystem.Models
+﻿@page "/process-rental"
 @using VillageRentalManagementSystem.Services
-@inject NavigationManager navigationManager
+@using VillageRentalManagementSystem.Models
 @inject CustomerService customerService
+@inject EquipmentService equipmentService
 @inject RentalService rentalService
+@inject NavigationManager navigationManager
 
-<div class="form-group mb-3">
-    <div class="">
-        <label class="form-label"> First Name:</label>
-        <select class="form-select">
-            @foreach (Customer customer in customerService.customers)
-            {
-                <option value="@customer.Id">@customer.FirstName, @customer.LastName</option>
-            }
-        </select>
+<h3>Process New Rental</h3>
+
+<div class="container">
+    <div class="row gx-5">
+
+        <!--  COLUMN 1: Customer & Cart -->
+        <div class="col-md-6">
+
+            <!-- Customer Search Section -->
+            <h4>1. Find Customer</h4>
+            <div class="card p-3 mb-4">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Enter Customer ID or Name..." />
+                    <button class="btn btn-primary">Find Customer</button>
+                </div>
+                <!-- We will display customer details here later -->
+            </div>
+
+            <!-- Shopping Cart Section -->
+            <h4>3. Shopping Cart</h4>
+            <div class="card p-3">
+                <!-- We will display cart items here later -->
+                <p>Cart is empty.</p>
+                <hr />
+                <div class="d-grid gap-2">
+                    <button class="btn btn-success">Go to Checkout</button>
+                    <button class="btn btn-danger">Clear Cart</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- COLUMN 2: Equipment Search -->
+        <div class="col-md-6">
+            <h4>2. Find Equipment</h4>
+            <div class="card p-3">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Enter Equipment ID or Name..." />
+                    <button class="btn btn-primary">Find Equipment</button>
+                </div>
+                <!-- We will display equipment search results here later -->
+            </div>
+        </div>
+
     </div>
 </div>
 
+
 @code {
-    
+    // This will hold the customer once we find them.
+    private Customer selectedCustomer;
+
+    // This will hold the equipment that the user searches for.
+    private Equipment foundEquipment;
+
+    // This is our shopping cart. It's a list of items to be rented.
+    private List<RentalItem> shoppingCart = new List<RentalItem>();
+
+    // These strings will be bound to the search boxes.
+    private string customerSearchTerm;
+    private string equipmentSearchTerm;
+
+    // This method will run when the page loads.
+    protected override void OnInitialized()
+    {
+        // We can add logic here later if needed.
+    }
+
+    // We will add methods for finding customers, finding equipment,
+    // adding to the cart, and checking out in the next steps.
 }
