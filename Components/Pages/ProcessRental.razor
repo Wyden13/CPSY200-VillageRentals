@@ -1,22 +1,241 @@
-﻿@page "/processrental"
-@using VillageRentalManagementSystem.Models
+﻿@page "/process-rental"
 @using VillageRentalManagementSystem.Services
-@inject NavigationManager navigationManager
+@using VillageRentalManagementSystem.Models
 @inject CustomerService customerService
+@inject EquipmentService equipmentService
 @inject RentalService rentalService
+@inject NavigationManager navigationManager
 
-<div class="form-group mb-3">
-    <div class="">
-        <label class="form-label"> First Name:</label>
-        <select class="form-select">
-            @foreach (Customer customer in customerService.customers)
-            {
-                <option value="@customer.Id">@customer.FirstName, @customer.LastName</option>
-            }
-        </select>
+<h3>Process New Rental</h3>
+
+<!-- This message will appear after a checkout attempt -->
+@if (!string.IsNullOrWhiteSpace(message))
+{
+    <div class="alert alert-info" role="alert">
+        @message
+    </div>
+}
+
+<div class="container">
+    <div class="row gx-5">
+
+        <!-- ========================== -->
+        <!--  COLUMN 1: Customer & Cart -->
+        <!-- ========================== -->
+        <div class="col-md-6">
+
+            <!-- Customer Search Section -->
+            <h4>1. Find Customer</h4>
+            <div class="card p-3 mb-4">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Enter Customer ID or Name..." @bind="customerSearchTerm" />
+                    <button class="btn btn-primary" @onclick="FindCustomer">Find Customer</button>
+                </div>
+
+                <!-- Display Customer Details if Found -->
+                @if (selectedCustomer != null)
+                {
+                    <hr />
+                    <h5>Customer Details</h5>
+                    <p>
+                        <strong>Name:</strong> @selectedCustomer.FirstName @selectedCustomer.LastName<br />
+                        <strong>Email:</strong> @selectedCustomer.Email<br />
+                        <strong>Phone:</strong> @selectedCustomer.PhoneNumber
+                    </p>
+
+                    @if (selectedCustomer.IsBanned)
+                    {
+                        <div class="alert alert-danger" role="alert">
+                            <strong>This customer is BANNED. Do not rent to them.</strong>
+                        </div>
+                    }
+                }
+            </div>
+
+            <!-- Shopping Cart Section -->
+            <h4>3. Shopping Cart</h4>
+            <div class="card p-3">
+                @if (shoppingCart.Any())
+                {
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Equipment</th>
+                                <th class="text-end">Cost</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in shoppingCart)
+                            {
+                                <tr>
+                                    <td>@item.equipment.Name</td>
+                                    <td class="text-end">@item.rentalCost.ToString("C")</td>
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-outline-danger" @onclick="() => RemoveFromCart(item)">X</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                    <hr />
+                    <h5 class="text-end">Total: @TotalCost.ToString("C")</h5>
+                }
+                else
+                {
+                    <p>Cart is empty.</p>
+                }
+                <hr />
+                <div class="d-grid gap-2">
+                    <button class="btn btn-success" @onclick="Checkout" disabled="@(!shoppingCart.Any() || selectedCustomer == null || selectedCustomer.IsBanned)">Go to Checkout</button>
+                    <button class="btn btn-danger" @onclick="ClearCart" disabled="@(!shoppingCart.Any())">Clear Cart</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================== -->
+        <!-- COLUMN 2: Equipment Search -->
+        <!-- ========================== -->
+        <div class="col-md-6">
+            <h4>2. Find Equipment</h4>
+            <div class="card p-3">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Enter Equipment ID or Name..." @bind="equipmentSearchTerm" />
+                    <button class="btn btn-primary" @onclick="FindEquipment">Find Equipment</button>
+                </div>
+
+                <!-- Display Equipment Search Results -->
+                @if (foundEquipment != null)
+                {
+                    <hr />
+                    <h5>Equipment Details</h5>
+                    <p>
+                        <strong>Name:</strong> @foundEquipment.Name<br />
+                        <strong>Description:</strong> @foundEquipment.Description<br />
+                        <strong>Daily Cost:</strong> @foundEquipment.DailyRentalCost.ToString("C")
+                    </p>
+
+                    @if (foundEquipment.IsAvailable)
+                    {
+                        <button class="btn btn-success" @onclick="AddToCart">Add to Cart</button>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning" role="alert">
+                            This item is currently unavailable for rent.
+                        </div>
+                    }
+                }
+            </div>
+        </div>
     </div>
 </div>
 
+
 @code {
-    
+    private Customer selectedCustomer;
+    private Equipment foundEquipment;
+    private List<RentalItem> shoppingCart = new List<RentalItem>();
+    private string customerSearchTerm;
+    private string equipmentSearchTerm;
+    private string message; // For user feedback
+
+    private double TotalCost => shoppingCart.Sum(item => item.rentalCost);
+
+    protected override void OnInitialized() { }
+
+    private async Task FindCustomer()
+    {
+        message = string.Empty; // Clear previous messages
+        if (!string.IsNullOrWhiteSpace(customerSearchTerm))
+        {
+            selectedCustomer = await customerService.FindCustomerAsync(customerSearchTerm);
+            if (selectedCustomer == null)
+            {
+                message = "Customer not found.";
+            }
+        }
+    }
+
+    private async Task FindEquipment()
+    {
+        message = string.Empty; // Clear previous messages
+        if (!string.IsNullOrWhiteSpace(equipmentSearchTerm))
+        {
+            foundEquipment = await equipmentService.FindEquipmentAsync(equipmentSearchTerm);
+            if (foundEquipment == null)
+            {
+                message = "Equipment not found.";
+            }
+        }
+    }
+
+    private void AddToCart()
+    {
+        if (selectedCustomer == null)
+        {
+            message = "Error: Please select a customer before adding items to the cart.";
+            return;
+        }
+        if (selectedCustomer.IsBanned)
+        {
+            message = "Error: Cannot add items for a banned customer.";
+            return;
+        }
+        if (foundEquipment != null && foundEquipment.IsAvailable)
+        {
+            var rentalItem = new RentalItem
+            {
+                equipment = foundEquipment,
+                rentalCost = foundEquipment.DailyRentalCost
+            };
+            shoppingCart.Add(rentalItem);
+            foundEquipment = null;
+            equipmentSearchTerm = string.Empty;
+            message = $"{rentalItem.equipment.Name} added to cart!";
+        }
+    }
+
+    private void RemoveFromCart(RentalItem itemToRemove)
+    {
+        if (itemToRemove != null)
+        {
+            shoppingCart.Remove(itemToRemove);
+            message = $"{itemToRemove.equipment.Name} removed from cart.";
+        }
+    }
+
+    private void ClearCart()
+    {
+        shoppingCart.Clear();
+        message = "Cart cleared.";
+    }
+
+    private async Task Checkout()
+    {
+        // Create the new rental object, passing the customer and items to it.
+        var newRental = new Rental(0, selectedCustomer, shoppingCart);
+
+        // The RentalService will handle all the database work.
+        bool success = await rentalService.CreateRentalAsync(newRental);
+
+        if (success)
+        {
+            message = $"Rental #{newRental.Id} created successfully for {selectedCustomer.FirstName}.";
+            ResetPage();
+        }
+        else
+        {
+            message = "There was an error creating the rental. Please try again.";
+        }
+    }
+
+    private void ResetPage()
+    {
+        selectedCustomer = null;
+        customerSearchTerm = string.Empty;
+        foundEquipment = null;
+        equipmentSearchTerm = string.Empty;
+        shoppingCart.Clear();
+    }
 }

@@ -12,7 +12,7 @@ namespace VillageRentalManagementSystem.Models
         public int Id { get; set; }
         public Customer customer;
         
-        List<RentalItem> items;
+        public List<RentalItem> items;
 
         public Rental()
         {

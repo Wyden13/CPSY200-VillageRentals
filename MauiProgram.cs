@@ -25,6 +25,7 @@ namespace VillageRentalManagementSystem
             builder.Services.AddSingleton<CategoryService>();
             builder.Services.AddSingleton<EquipmentService>();
             builder.Services.AddSingleton<RentalService>();
+            builder.Services.AddSingleton<ReportService>();
 
             return builder.Build();
         }
