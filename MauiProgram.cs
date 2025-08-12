@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using VillageRentalManagementSystem.Services;
 
 namespace VillageRentalManagementSystem
 {
@@ -20,6 +21,10 @@ namespace VillageRentalManagementSystem
     		builder.Services.AddBlazorWebViewDeveloperTools();
     		builder.Logging.AddDebug();
 #endif
+            builder.Services.AddSingleton<CustomerService>();
+            builder.Services.AddSingleton<CategoryService>();
+            builder.Services.AddSingleton<EquipmentService>();
+            builder.Services.AddSingleton<RentalService>();
 
             return builder.Build();
         }
