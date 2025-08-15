@@ -51,12 +51,12 @@ namespace VillageRentalManagementSystem.Services
                         ON r.Id = ri.RentalId
                     WHERE CAST(r.RentalDate AS DATE) = @SalesDate
                         GROUP BY
-                            r.RentalDate,
+                            CAST(r.RentalDate AS DATE),
                             r.Id,
                             c.FirstName,
                             c.LastName,
                             r.TotalCost
-                    ORDER BY r.RentalDate;";
+                    ORDER BY r.Id;";
 
                 using (var command = new SqlCommand(query, connection))
                 {
