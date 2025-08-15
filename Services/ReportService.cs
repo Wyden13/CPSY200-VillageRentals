@@ -25,25 +25,42 @@ namespace VillageRentalManagementSystem.Services
         /// Generates a sales report, summarizing total rental income per day
         /// within a specified date range.
         /// </summary>
-        public async Task<List<DailySalesReportItem>> GetSalesByDateRangeAsync(DateTime startDate, DateTime endDate)
+        public async Task<List<DailySalesReportItem>> GetSalesByDateAsync(DateTime salesDate)
         {
-            var reportData = new List<DailySalesReportItem>();
+            List<DailySalesReportItem> reportData = new List<DailySalesReportItem>();
+            int rentalId = 0;
+            string cFirstName = "";
+            string cLastName = "";
+            double rTotalCost = 0;
+
             using (var connection = new SqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
                 var query = @"
                     SELECT 
-                        CAST(RentalDate AS DATE) AS SaleDate, 
-                        SUM(TotalCost) AS TotalDailySales
-                    FROM Rentals
-                    WHERE RentalDate >= @StartDate AND RentalDate < @EndDatePlusOne
-                    GROUP BY CAST(RentalDate AS DATE)
-                    ORDER BY SaleDate;";
+                        CAST(r.RentalDate AS DATE) AS SaleDate, 
+                        r.Id, 
+                        c.FirstName,
+                        c.LastName,
+                        COUNT(ri.Id) AS NumberOfItems,
+                        r.TotalCost
+                    FROM Rentals r
+                    JOIN Customers c
+                        ON r.CustomerId = c.Id
+                    JOIN RentalItems ri
+                        ON r.Id = ri.RentalId
+                    WHERE CAST(r.RentalDate AS DATE) = @SalesDate
+                        GROUP BY
+                            r.RentalDate,
+                            r.Id,
+                            c.FirstName,
+                            c.LastName,
+                            r.TotalCost
+                    ORDER BY r.RentalDate;";
 
                 using (var command = new SqlCommand(query, connection))
                 {
-                    command.Parameters.AddWithValue("@StartDate", startDate.Date);
-                    command.Parameters.AddWithValue("@EndDatePlusOne", endDate.Date.AddDays(1));
+                    command.Parameters.AddWithValue("@SalesDate", salesDate.Date);
 
                     using (var reader = await command.ExecuteReaderAsync())
                     {
@@ -52,7 +69,11 @@ namespace VillageRentalManagementSystem.Services
                             reportData.Add(new DailySalesReportItem
                             {
                                 Date = reader.GetDateTime(reader.GetOrdinal("SaleDate")),
-                                TotalSales = reader.GetDecimal(reader.GetOrdinal("TotalDailySales"))
+                                RentalId = reader.GetInt32(reader.GetOrdinal("Id")),
+                                CustFirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                CustLastName = reader.GetString(reader.GetOrdinal("LastName")),
+                                NumberOfItems = reader.GetInt32(reader.GetOrdinal("NumberOfItems")),
+                                TotalSales = reader.GetDecimal(reader.GetOrdinal("TotalCost"))
                             });
                         }
                     }

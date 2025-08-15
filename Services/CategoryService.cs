@@ -12,7 +12,8 @@ namespace VillageRentalManagementSystem.Services
 
         public CategoryService()
         {
-            _connectionString = "Server=(localdb)\\MSSQLLocalDB;Database=VillageRentalDB;Trusted_Connection=True;";
+
+            _connectionString = "Server=(localdb)\\MSSQLLocalDB;Initial Catalog=VillageRentalDB;Integrated Security=True";
 
         }
 
