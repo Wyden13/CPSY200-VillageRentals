@@ -12,7 +12,7 @@ namespace VillageRentalManagementSystem.Services
 
         public EquipmentService(IConfiguration configuration)
         {
-            connectionString = configuration.GetConnectionString("DefaultConnection");
+            connectionString = "Server=(localdb)\\MSSQLLocalDB;Initial Catalog=VillageRentalDB;Integrated Security=True";
         }
 
 

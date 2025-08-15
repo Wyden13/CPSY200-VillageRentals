@@ -13,7 +13,7 @@ namespace VillageRentalManagementSystem.Services
         public CustomerService(IConfiguration configuration)
         {
 #pragma warning disable CS8601 // Possible null reference assignment.
-            _connectionString = configuration.GetConnectionString("DefaultConnection");
+            _connectionString = "Server=(localdb)\\MSSQLLocalDB;Initial Catalog=VillageRentalDB;Integrated Security=True";
 #pragma warning restore CS8601 // Possible null reference assignment.
         }
 
