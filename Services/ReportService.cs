@@ -113,7 +113,11 @@ namespace VillageRentalManagementSystem.Services
                             {
                                 CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
                                 CustomerName = reader.GetString(reader.GetOrdinal("CustomerName")),
-                                TotalAmountSpent = reader.GetDecimal(reader.GetOrdinal("TotalAmountSpent"))
+                                // Get the column's position once to make the code cleaner
+
+                                // Use a ternary operator to check for DBNull
+                                // This says: "If the value is DBNull, use 0. Otherwise, get the decimal value."
+                                TotalAmountSpent = reader.IsDBNull(reader.GetOrdinal("TotalAmountSpent")) ? 0 : reader.GetDecimal(reader.GetOrdinal("TotalAmountSpent"))
                             });
                         }
                     }

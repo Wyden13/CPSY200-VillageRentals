@@ -33,7 +33,7 @@
                 <button @onclick="SelectDate">Generate</button>
             </div>
         }
-        @if(isSalesByCustomer) {
+        @* @if(isSalesByCustomer) {
             <div class="md-3">
                 <label class="form-label">Customer:</label>
                 <select class="form-select" @bind="CustomerID">
@@ -47,8 +47,8 @@
             <div>
                 <button>Generate</button>
             </div>
-        }
-        @if (isListByCategory) {
+        } *@
+        @* @if (isListByCategory) {
             <div class="md-3">
                 <label class="form-label">Categories:</label>
                 <select class="form-select" @bind="CategoryID">
@@ -62,7 +62,7 @@
             <div>
                 <button>Generate</button>
             </div>
-        }
+        } *@
     </div>
 
     <div>
@@ -94,15 +94,14 @@
                 </tbody>
             </table>
             }<!-- end sales by date -->
-            @if (isSalesByCustomer && customerSales != null)
+            @if (isSalesByCustomer)
             {
             <table>
                 <thead>
                     <tr>
-                        <td>Customer Id: </td>
-                        <td>Customer First Name: </td>
-                        <td>Customer Last Name: </td>
-                        <td>Total Amount Spent : </td>
+                        <td>Customer Id </td>
+                        <td>Customer Name </td>
+                        <td>Total Amount Spent </td>
                     </tr>
                 </thead>
                 <tbody>
@@ -110,9 +109,30 @@
                     {
                         <tr>
                             <td>@item.CustomerId</td>
-                            <td>@item.FirstName</td>
-                            <td>@item.LastName</td>
+                            <td>@item.CustomerName</td>
                             <td>@item.TotalAmountSpent</td>
+                        </tr>        
+                    }
+                </tbody>
+            </table>
+            }
+            @if (isListByCategory)
+            {
+            <table>
+                <thead>
+                    <tr>
+                        <td>Category Id </td>
+                        <td>Category Name </td>
+                        <td>Total Sales </td>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (CategorySalesReportItem item in categorySales)
+                    {
+                        <tr>
+                            <td>@item.CategoryId</td>
+                            <td>@item.CategoryName</td>
+                            <td>@item.TotalSales</td>
                         </tr>        
                     }
                 </tbody>
@@ -134,19 +154,24 @@
 
     private DateTime selectedDate;
     private Customer selectedCustomer;
-    private List<Category> categories;
     private Category selectedCategory;
+
     private List<Customer> customers;
+    private List<Category> categories;
 
     private List<DailySalesReportItem> dailySales;
     private List<CustomerSalesReportItem> customerSales;
+    private List<CategorySalesReportItem> categorySales;
 
     protected override async Task OnInitializedAsync()
     {
         selectedDate = DateTime.Now;
         customers = await customerService.GetAllCustomersAsync();
         categories = await categoryService.GetAllCategoriesAsync();
+        customerSales = await reportService.GetSalesByCustomerAsync();
+        categorySales = await reportService.GetSalesByCategoryAsync();
     }
+
 
     private void SalesByDateSelected()
     {
@@ -159,15 +184,25 @@
         if (selectedDate != null)
         {
             dailySales = await reportService.GetSalesByDateAsync(selectedDate);
-            dailySales.ForEach(e => TotalSalesOfDate += decimal.ToDouble(e.TotalSales));
         }
     }
-    private void SalesByCustomerSelected()
+
+
+    private async Task SalesByCustomerSelected()
     {
         isSalesByDate = false;
         isSalesByCustomer = true;
         isListByCategory = false;
+        
     }
+    // private async Task SelectCustomer()
+    // {
+    //     if (selectedDate != null)
+    //     {
+    //         dailySales = await reportService.GetSalesByDateAsync(selectedDate);
+    //         dailySales.ForEach(e => TotalSalesOfDate += decimal.ToDouble(e.TotalSales));
+    //     }
+    // }
 
     private void ListByCategorySelected()
     {
@@ -175,4 +210,6 @@
         isSalesByCustomer = false;
         isListByCategory = true;
     }
+
+
 }
