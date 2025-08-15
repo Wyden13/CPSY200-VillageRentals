@@ -15,6 +15,7 @@ namespace VillageRentalManagementSystem.Models
         public double DailyRentalCost { get; set; }
         public bool IsAvailable {  get; set; }
         public Category Category;
+        //public int CategoryId { get;set; }
         public Equipment(int id, string name, string description, double dailyRentalCost, bool isAvailable, Category category) : this(id, name, description, dailyRentalCost, isAvailable)
         {
             Category = category;
@@ -26,11 +27,12 @@ namespace VillageRentalManagementSystem.Models
             Name = name;
             Description = description;
             DailyRentalCost = dailyRentalCost;
-            IsAvailable = isAvailable;
+            
         }
 
         public Equipment()
         {
+            IsAvailable = true;
         }
 
     }

@@ -16,7 +16,6 @@ namespace VillageRentalManagementSystem
                 });
 
             builder.Services.AddMauiBlazorWebView();
-            builder.Services.AddSingleton<CustomerService>();
 
 #if DEBUG
             builder.Services.AddBlazorWebViewDeveloperTools();

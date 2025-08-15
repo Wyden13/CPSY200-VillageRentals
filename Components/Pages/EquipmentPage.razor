@@ -6,6 +6,12 @@
 
 
 <h3>EquipmentPage</h3>
+@if (!string.IsNullOrWhiteSpace(message))
+{
+    <div class="alert alert-info" role="alert">
+        @message
+    </div>
+}
 <div class="container">
     <div class="row mb-3">
         <div class="col-8">
@@ -23,6 +29,8 @@
                 <th scope="col">Description</th>
                 <th scope="col">Daily Rental Cost</th>
                 <th scope="col">Category</th>
+                <th scope="col">Availability</th>
+
                 <th scope="col">Actions</th>
             </tr>
         </thead>
@@ -36,9 +44,10 @@
                         <td>@equipment.Name</td>
                         <td>@equipment.Description</td>
                         <td>@equipment.DailyRentalCost.ToString("C")</td>
-                        <td>@equipment.Category?.Name ?? "Uncategorized"</td>
+                        <td>@(equipment.Category?.Name ?? "Uncategorized")</td>
+                        <td>@(equipment.IsAvailable? "Yes":"No")</td>
                         <td>
-                            <button class="btn btn-danger" @onclick="@(() => DeleteEquipment(equipment.Id))">Delete</button>
+                            <button class="btn btn-danger" @onclick="() => DeleteEquipment(equipment)">Delete</button>
                         </td>
                     </tr>
                 }
@@ -62,7 +71,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="mb-2">
-                        <label for="equipmentName" class="form-label"></label>
+                        <label for="equipmentName" class="form-label">Name:</label>
                         <input 
                             type="text" 
                             class="form-control" 
@@ -72,7 +81,7 @@
                         >
                     </div>
                     <div class="mb-2">
-                        <label for="equipmentDescription" class="form-label"></label>
+                        <label for="equipmentDescription" class="form-label">Desc:</label>
                         <input type="text"
                                class="form-control"
                                id="equipmentDescription"
@@ -81,7 +90,7 @@
                         >
                     </div>
                     <div class="mb-2">
-                        <label for="rentalCost" class="form-label"></label>
+                        <label for="rentalCost" class="form-label">Rental Cost</label>
                         <input type="number"
                                class="form-control"
                                id="rentalCost"
@@ -91,7 +100,7 @@
 
                     </div>
                     <div class="mb-2">
-                        <label for="equipmentCategory" class="form-label"></label>
+                        <label for="equipmentCategory" class="form-label">Category:</label>
                         <select class="form-select" @bind="selectedCategoryId">
                             <option value="">Select Category</option>
                             @foreach (var category in categories)
@@ -118,14 +127,11 @@
     private int selectedCategoryId;
     private Equipment? equipment = new();
     private bool showEquipmentModal = false;
-
+    private string message = "";
     protected override async Task OnInitializedAsync()
     {
-        // equipmentList = await EquipmentService.GetAllEquipmentAsync();
-    }
-    private async Task FetchCategories()
-    {
-        // categories = await CategoryService.GetAllCategoriesAsync();
+        equipmentList = await equipmentService.GetAllEquipmentAsync();
+        categories = await categoryService.GetAllCategoriesAsync();
     }
 
     private void ShowAddEquipmentModal()
@@ -139,11 +145,20 @@
     }
     private async Task AddEquipment()
     {
+
         if(string.IsNullOrWhiteSpace(equipment.Name) || 
            string.IsNullOrWhiteSpace(equipment.Description) || 
            equipment.DailyRentalCost <= 0)
         {
             return;
+        }
+        if (selectedCategoryId > 0)
+        {
+            equipment.Category = categories.FirstOrDefault(c => c.Id == selectedCategoryId);
+        }
+        else
+        {
+            equipment.Category = null;
         }
         var successCheck = await equipmentService.AddEquipmentAsync(equipment);
         if (successCheck)
@@ -152,16 +167,26 @@
             showEquipmentModal = false; 
         }
     }
-    private async Task DeleteEquipment(int id)
+    private async Task DeleteEquipment(Equipment equipment)
     {
-        var successCheck = await equipmentService.DeleteEquipmentAsync(id);
-        if (successCheck)
+        message = string.Empty;
+        if (equipment.IsAvailable)
         {
-            var equipmentToRemove = equipmentList.FirstOrDefault(e => e.Id == id);
-            if (equipmentToRemove != null)
+            var successCheck = await equipmentService.DeleteEquipmentAsync(equipment.Id);
+            if (successCheck)
             {
-                equipmentList.Remove(equipmentToRemove);
+                var equipmentToRemove = equipmentList.FirstOrDefault(e => e.Id == equipment.Id);
+                if (equipmentToRemove != null)
+                {
+                    equipmentList.Remove(equipmentToRemove);
+                    message = "Equipment deleted successfully.";
+                }
             }
+        }
+        else
+        {
+            message = "Error: Cannot delete equipment that is currently rented out.";
+
         }
     }
 }
