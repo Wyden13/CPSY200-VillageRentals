@@ -16,17 +16,16 @@ namespace VillageRentalManagementSystem
                 });
 
             builder.Services.AddMauiBlazorWebView();
-            builder.Services.AddSingleton<CustomerService>();
 
 #if DEBUG
             builder.Services.AddBlazorWebViewDeveloperTools();
     		builder.Logging.AddDebug();
 #endif
-            builder.Services.AddSingleton<CustomerService>();
-            builder.Services.AddSingleton<CategoryService>();
-            builder.Services.AddSingleton<EquipmentService>();
-            builder.Services.AddSingleton<RentalService>();
-            builder.Services.AddSingleton<ReportService>();
+            builder.Services.AddScoped<CustomerService>();
+            builder.Services.AddScoped<CategoryService>();
+            builder.Services.AddScoped<EquipmentService>();
+            builder.Services.AddScoped<RentalService>();
+            builder.Services.AddScoped<ReportService>();
 
             return builder.Build();
         }

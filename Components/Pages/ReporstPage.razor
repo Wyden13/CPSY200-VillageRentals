@@ -11,16 +11,34 @@
 <div class="">
     <div class="">
         <div class="">
-            <button class="btn-outline-secondary"> Sales by Date</button>
+            <button class="btn-outline-secondary" @onclick="SalesByDateSelected"> Sales by Date</button>
         </div>
         <div class="">
-            <button class="btn-outline-secondary"> Sales by Customer</button>
+            <button class="btn-outline-secondary" @onclick="SalesByCustomerSelected"> Sales by Customer</button>
         </div>
         <div class="">
-            <button class="btn-outline-secondary"> List items by Category</button>
+            <button class="btn-outline-secondary" @onclick="ListByCategorySelected"> List items by Category</button>
         </div>
     </div>
     <div class="">
+        @if(isSalesByDate) {
+            <div class="md-3">
+                <label class="form-label">Date and Time:</label>
+                <input type="datetime-local" @bind="selectedDate" class="form-control" />
+            </div>
+        }
+        @if(isSalesByCustomer) {
+            <div class="md-3">
+                <label class="form-label">Customer:</label>
+                <select class="form-select" @bind="selectedCustomer">
+                    <option value="0">-- Select a Date --</option>
+                    @foreach (Customer customer in customers)
+                    {
+                        <option value="@customer.Id">@customer.LastName, @customer.FirstName</option>
+                    }
+                </select>
+            </div>
+        }
 
     </div>
 </div>
@@ -28,6 +46,33 @@
 @code {
     private bool isSalesByDate = false;
     private bool isSalesByCustomer = false;
-    private bool isSalesByCategory = false;
+    private bool isListByCategory = false;
 
+    private DateTime selectedDate;
+    private Customer selectedCustomer;
+    private List<Customer> customers;
+
+    protected override async Task OnInitializedAsync()
+    {
+        customers = await customerService.GetAllCustomersAsync();
+    }
+
+    private void SalesByDateSelected()
+    {
+        isSalesByDate = true;
+        isSalesByCustomer = false;
+        isListByCategory = false;
+    }
+    private void SalesByCustomerSelected()
+    {
+        isSalesByDate = false;
+        isSalesByCustomer = true;
+        isListByCategory = false;
+    }
+    private void ListByCategorySelected()
+    {
+        isSalesByDate = false;
+        isSalesByCustomer = false;
+        isListByCategory = true;
+    }
 }
