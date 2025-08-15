@@ -31,36 +31,6 @@
                 <button @onclick="SelectDate">Generate</button>
             </div>
         }
-        @* @if(isSalesByCustomer) {
-            <div class="md-3">
-                <label class="form-label">Customer:</label>
-                <select class="form-select" @bind="CustomerID">
-                    <option value="0">-- Select a Date --</option>
-                    @foreach (Customer customer in customers)
-                    {
-                        <option value="@customer.Id">@customer.LastName, @customer.FirstName</option>
-                    }
-                </select>
-            </div>
-            <div>
-                <button>Generate</button>
-            </div>
-        } *@
-        @* @if (isListByCategory) {
-            <div class="md-3">
-                <label class="form-label">Categories:</label>
-                <select class="form-select" @bind="CategoryID">
-                    <option value="0">-- Select a Category --</option>
-                    @foreach (Customer customer in customers)
-                    {
-                        <option value="@customer.Id">@customer.LastName, @customer.FirstName</option>
-                    }
-                </select>
-            </div>
-            <div>
-                <button>Generate</button>
-            </div>
-        } *@
     </div>
 
     <div>
@@ -94,12 +64,12 @@
             }<!-- end sales by date -->
             @if (isSalesByCustomer)
             {
-            <table>
+            <table class="table table-hover">
                 <thead>
                     <tr>
-                        <td>Customer Id </td>
-                        <td>Customer Name </td>
-                        <td>Total Amount Spent </td>
+                        <td class="col">Customer Id </td>
+                        <td class="col">Customer Name </td>
+                        <td class="col">Total Amount Spent </td>
                     </tr>
                 </thead>
                 <tbody>
@@ -119,9 +89,9 @@
             <table>
                 <thead>
                     <tr>
-                        <td>Category Id </td>
-                        <td>Category Name </td>
-                        <td>Total Sales </td>
+                            <td class="col">Category Id </td>
+                            <td class="col">Category Name </td>
+                            <td class="col">Total Sales </td>
                     </tr>
                 </thead>
                 <tbody>
