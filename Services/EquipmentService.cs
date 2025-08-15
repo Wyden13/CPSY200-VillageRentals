@@ -118,5 +118,19 @@ namespace VillageRentalManagementSystem.Services
                 }
             }
         }
+        public async Task<bool> DeleteEquipmentAsync(int equipmentId)
+        {
+            using (var connection = new SqlConnection(connectionString))
+            {
+                await connection.OpenAsync();
+                var query = "DELETE FROM Equipment WHERE Id = @EquipmentId";
+                using (var command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@EquipmentId", equipmentId);
+                    int result = await command.ExecuteNonQueryAsync();
+                    return result > 0;
+                }
+            }
+        }
     }
 }

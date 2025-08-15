@@ -1,0 +1,138 @@
+﻿@page "/customers"
+@using VillageRentalManagementSystem.Models
+@using VillageRentalManagementSystem.Services
+@inject CustomerService customerService
+
+<h3>Manage Customer</h3>
+
+<div class="container">
+    <div class="row justify-content-between mb-3">
+        <div class="col-8">
+            <h4>Customer List</h4>
+        </div>
+        <div class="col-4">
+            <button class="btn btn-primary w-100" @onclick="ShowAddCustomerModal">Add Customer</button>
+        </div>
+    </div>
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">First Name</th>
+                <th scope="col">Last Name</th>
+                <th scope="col">Phone</th>
+                <th scope="col">Email</th>
+                <th scope="col">Discount Rate</th>
+                <th scope="col">Status</th>
+                <th scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (customers.Any())
+            {
+                @foreach (var customer in customers)
+                {
+                    <tr>
+                        <th scope="row">@customer.Id</th>
+                        <td>@customer.FirstName</td>
+                        <td>@customer.LastName</td>
+                        <td>@customer.PhoneNumber</td>
+                        <td>@customer.Email</td>
+                        <td>@customer.DiscountRate %</td>
+                        <td>@(customer.IsBanned ? "Banned" : "Active")</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr><td colspan="12" class="text-center">No customer exists</td></tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Add/Edit Modal -->
+@if (showCustomerModal)
+{
+    <div class="modal show d-block" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Customer</h5>
+                    <button type="button" class="btn-close" @onclick="CloseCustomerModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-2">
+                        <label>First Name</label>
+                        <input class="form-control" @bind="modalCustomer.FirstName" />
+                    </div>
+                    <div class="mb-2">
+                        <label>Last Name</label>
+                        <input class="form-control" @bind="modalCustomer.LastName" />
+                    </div>
+                    <div class="mb-2">
+                        <label>Phone</label>
+                        <input class="form-control" @bind="modalCustomer.PhoneNumber" />
+                    </div>
+                    <div class="mb-2">
+                        <label>Email</label>
+                        <input class="form-control" @bind="modalCustomer.Email" />
+                    </div>
+                    <div class="mb-2">
+                        <label>Discount Rate</label>
+                        <input type="number" class="form-control" @bind="modalCustomer.DiscountRate" min="0" max="100" />
+                    </div>
+                    <div class="mb-2">
+                        <label>Status</label>
+                        <select class="form-select" @bind="modalCustomer.IsBanned">
+                            <option value="false">Active</option>
+                            <option value="true">Banned</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="CloseCustomerModal">Cancel</button>
+                    <button class="btn btn-primary" @onclick="AddCustomer">Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop show"></div>
+}
+@code {
+    private List<Customer> customers = new();
+    private Customer modalCustomer = new();
+    private bool showCustomerModal = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // customers = await customerService.GetAllCustomersAsync();
+    }
+
+    private void ShowAddCustomerModal()
+    {
+        modalCustomer = new Customer();
+        showCustomerModal = true;
+    }
+
+    private void CloseCustomerModal()
+    {
+        showCustomerModal = false;
+    }
+    private async Task AddCustomer()
+    {
+        if (string.IsNullOrWhiteSpace(modalCustomer.FirstName) ||
+            string.IsNullOrWhiteSpace(modalCustomer.LastName) ||
+            string.IsNullOrWhiteSpace(modalCustomer.PhoneNumber) ||
+            string.IsNullOrWhiteSpace(modalCustomer.Email))
+        {
+            return;
+        }
+        var successCheck = await customerService.AddCustomerAsync(modalCustomer);
+        if(successCheck)
+        {
+            customers.Add(modalCustomer);
+            showCustomerModal = false;
+        }
+    }
+}

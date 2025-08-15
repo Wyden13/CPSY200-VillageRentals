@@ -8,11 +8,13 @@ namespace VillageRentalManagementSystem.Services
 {
     public class CustomerService
     {
-        private readonly string connectionString;
+        private readonly string _connectionString;
 
         public CustomerService(IConfiguration configuration)
         {
-            connectionString = configuration.GetConnectionString("DefaultConnection");
+#pragma warning disable CS8601 // Possible null reference assignment.
+            _connectionString = configuration.GetConnectionString("DefaultConnection");
+#pragma warning restore CS8601 // Possible null reference assignment.
         }
 
         public async Task<Customer> FindCustomerAsync(string searchTerm)
@@ -20,7 +22,7 @@ namespace VillageRentalManagementSystem.Services
             Customer customer = null;
             string query;
 
-            using (var connection = new SqlConnection(connectionString))
+            using (var connection = new SqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
 
@@ -62,7 +64,7 @@ namespace VillageRentalManagementSystem.Services
         public async Task<List<Customer>> GetAllCustomersAsync()
         {
             var customers = new List<Customer>();
-            using (var connection = new SqlConnection(connectionString))
+            using (var connection = new SqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
                 var query = "SELECT * FROM Customers ORDER BY LastName, FirstName";
@@ -91,7 +93,7 @@ namespace VillageRentalManagementSystem.Services
 
         public async Task<bool> AddCustomerAsync(Customer customer)
         {
-            using (var connection = new SqlConnection(connectionString))
+            using (var connection = new SqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
                 var query = @"

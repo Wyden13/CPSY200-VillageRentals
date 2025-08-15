@@ -1,0 +1,167 @@
+﻿@page "/equipments"
+@using VillageRentalManagementSystem.Models
+@using VillageRentalManagementSystem.Services
+@inject EquipmentService equipmentService
+@inject CategoryService categoryService
+
+
+<h3>EquipmentPage</h3>
+<div class="container">
+    <div class="row mb-3">
+        <div class="col-8">
+            <h4>Equipment List</h4>
+        </div>
+        <div class="col-4">
+            <button class="btn btn-primary w-100" @onclick="ShowAddEquipmentModal">Add Equipment</button>
+        </div>
+    </div>
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Name</th>
+                <th scope="col">Description</th>
+                <th scope="col">Daily Rental Cost</th>
+                <th scope="col">Category</th>
+                <th scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (equipmentList.Any())
+            {
+                @foreach (var equipment in equipmentList)
+                {
+                    <tr>
+                        <td>@equipment.Id</td>
+                        <td>@equipment.Name</td>
+                        <td>@equipment.Description</td>
+                        <td>@equipment.DailyRentalCost.ToString("C")</td>
+                        <td>@equipment.Category?.Name ?? "Uncategorized"</td>
+                        <td>
+                            <button class="btn btn-danger" @onclick="@(() => DeleteEquipment(equipment.Id))">Delete</button>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr><td colspan="6" class="text-center">No equipment available.</td></tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@if (showEquipmentModal)
+{
+    <div class="modal show d-block" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Equipment</h5>
+                    <button type="button" class="btn-close" @onclick=CloseEquipmentModal></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-2">
+                        <label for="equipmentName" class="form-label"></label>
+                        <input 
+                            type="text" 
+                            class="form-control" 
+                            id="equipmentName" 
+                            placeholder="Equipment Name" 
+                            @bind="equipment.Name"
+                        >
+                    </div>
+                    <div class="mb-2">
+                        <label for="equipmentDescription" class="form-label"></label>
+                        <input type="text"
+                               class="form-control"
+                               id="equipmentDescription"
+                               placeholder="Equipment Description"
+                               @bind="equipment.Description"
+                        >
+                    </div>
+                    <div class="mb-2">
+                        <label for="rentalCost" class="form-label"></label>
+                        <input type="number"
+                               class="form-control"
+                               id="rentalCost"
+                               placeholder="Daily Rental Cost"
+                               @bind="equipment.DailyRentalCost"
+                        >
+
+                    </div>
+                    <div class="mb-2">
+                        <label for="equipmentCategory" class="form-label"></label>
+                        <select class="form-select" @bind="selectedCategoryId">
+                            <option value="">Select Category</option>
+                            @foreach (var category in categories)
+                            {
+                                <option value="@category.Id">@category.Name</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="() => showEquipmentModal = false">Close</button>
+                    <button type="button" class="btn btn-primary" @onclick="AddEquipment">Add Equipment</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop show"></div>
+
+}
+
+@code {
+    private List<Equipment> equipmentList = new();
+    private List<Category> categories = new();
+    private int selectedCategoryId;
+    private Equipment? equipment = new();
+    private bool showEquipmentModal = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // equipmentList = await EquipmentService.GetAllEquipmentAsync();
+    }
+    private async Task FetchCategories()
+    {
+        // categories = await CategoryService.GetAllCategoriesAsync();
+    }
+
+    private void ShowAddEquipmentModal()
+    {
+        showEquipmentModal = true;
+        equipment = new Equipment();
+    }
+    private void CloseEquipmentModal()
+    {
+        showEquipmentModal = false;
+    }
+    private async Task AddEquipment()
+    {
+        if(string.IsNullOrWhiteSpace(equipment.Name) || 
+           string.IsNullOrWhiteSpace(equipment.Description) || 
+           equipment.DailyRentalCost <= 0)
+        {
+            return;
+        }
+        var successCheck = await equipmentService.AddEquipmentAsync(equipment);
+        if (successCheck)
+        {
+            equipmentList.Add(equipment);
+            showEquipmentModal = false; 
+        }
+    }
+    private async Task DeleteEquipment(int id)
+    {
+        var successCheck = await equipmentService.DeleteEquipmentAsync(id);
+        if (successCheck)
+        {
+            var equipmentToRemove = equipmentList.FirstOrDefault(e => e.Id == id);
+            if (equipmentToRemove != null)
+            {
+                equipmentList.Remove(equipmentToRemove);
+            }
+        }
+    }
+}
