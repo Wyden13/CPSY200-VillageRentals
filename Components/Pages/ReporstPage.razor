@@ -3,6 +3,7 @@
 @using VillageRentalManagementSystem.Models
 @inject CustomerService customerService
 @inject EquipmentService equipmentService
+@inject CategoryService categoryService
 @inject RentalService rentalService
 @inject NavigationManager navigationManager
 
@@ -30,8 +31,20 @@
         @if(isSalesByCustomer) {
             <div class="md-3">
                 <label class="form-label">Customer:</label>
-                <select class="form-select" @bind="selectedCustomer">
+                <select class="form-select" @bind="CustomerID">
                     <option value="0">-- Select a Date --</option>
+                    @foreach (Customer customer in customers)
+                    {
+                        <option value="@customer.Id">@customer.LastName, @customer.FirstName</option>
+                    }
+                </select>
+            </div>
+        }
+        @if (isListByCategory) {
+            <div class="md-3">
+                <label class="form-label">Categories:</label>
+                <select class="form-select" @bind="CategoryID">
+                    <option value="0">-- Select a Category --</option>
                     @foreach (Customer customer in customers)
                     {
                         <option value="@customer.Id">@customer.LastName, @customer.FirstName</option>
@@ -48,13 +61,19 @@
     private bool isSalesByCustomer = false;
     private bool isListByCategory = false;
 
+    private int CustomerID { get; set; }
+    private int CategoryID { get; set; }
+
     private DateTime selectedDate;
     private Customer selectedCustomer;
     private List<Customer> customers;
+    private List<Category> categories;
+    private Category selectedCategory;
 
     protected override async Task OnInitializedAsync()
     {
         customers = await customerService.GetAllCustomersAsync();
+        categories = await categoryService.GetAllCategoriesAsync();
     }
 
     private void SalesByDateSelected()

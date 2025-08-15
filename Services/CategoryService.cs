@@ -10,7 +10,7 @@ namespace VillageRentalManagementSystem.Services
     {
         private readonly string _connectionString;
 
-        public CategoryService(IConfiguration configuration)
+        public CategoryService()
         {
             _connectionString = "Server=(localdb)\\\\MSSQLLocalDB;Initial Catalog=VillageRentalDB;Integrated Security=True";
         }

@@ -10,7 +10,7 @@ namespace VillageRentalManagementSystem.Services
     {
         private readonly string connectionString;
 
-        public RentalService(IConfiguration configuration)
+        public RentalService()
         {
             connectionString = "Server=(localdb)\\MSSQLLocalDB;Initial Catalog=VillageRentalDB;Integrated Security=True";
                 //?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found in configuration.");
