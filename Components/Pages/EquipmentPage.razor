@@ -5,6 +5,7 @@
 @inject CategoryService categoryService
 
 
+
 <h3>EquipmentPage</h3>
 @if (!string.IsNullOrWhiteSpace(message))
 {
@@ -12,10 +13,11 @@
         @message
     </div>
 }
+
 <div class="container">
     <div class="row mb-3">
         <div class="col-8">
-            <h4>Equipment List</h4>
+            @* <h4>Equipment List</h4> *@
         </div>
         <div class="col-4">
             <button class="btn btn-primary w-100" @onclick="ShowAddEquipmentModal">Add Equipment</button>

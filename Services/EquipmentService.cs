@@ -13,6 +13,7 @@ namespace VillageRentalManagementSystem.Services
         public EquipmentService()
         {
             connectionString = "Server=(localdb)\\MSSQLLocalDB;Database=VillageRentalDB;Trusted_Connection=True;";
+
         }
 
 

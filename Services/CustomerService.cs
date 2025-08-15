@@ -16,6 +16,7 @@ namespace VillageRentalManagementSystem.Services
 #pragma warning disable CS8601 // Possible null reference assignment.
             //_connectionString = configuration.GetConnectionString("DefaultConnection");
             _connectionString = "Server=(localdb)\\MSSQLLocalDB;Database=VillageRentalDB;Trusted_Connection=True;";
+
 #pragma warning restore CS8601 // Possible null reference assignment.
         }
 
@@ -65,7 +66,7 @@ namespace VillageRentalManagementSystem.Services
 
         public async Task<List<Customer>> GetAllCustomersAsync()
         {
-            var customers = new List<Customer>();
+            List<Customer> customers = new List<Customer>();
             using (var connection = new SqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
