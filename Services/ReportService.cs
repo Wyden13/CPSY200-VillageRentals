@@ -18,7 +18,7 @@ namespace VillageRentalManagementSystem.Services
 
         public ReportService()
         {
-            _connectionString = "Server=(localdb)\\MSSQLLocalDB;Initial Catalog=VillageRentalDB;Integrated Security=True";
+            _connectionString = "Server=(localdb)\\MSSQLLocalDB;Database=VillageRentalDB;Trusted_Connection=True;";
         }
 
         /// <summary>

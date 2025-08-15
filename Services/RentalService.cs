@@ -12,8 +12,8 @@ namespace VillageRentalManagementSystem.Services
 
         public RentalService()
         {
-            connectionString = "Server=(localdb)\\MSSQLLocalDB;Initial Catalog=VillageRentalDB;Integrated Security=True";
-                //?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found in configuration.");
+            connectionString = "Server=(localdb)\\MSSQLLocalDB;Database=VillageRentalDB;Trusted_Connection=True;";
+            //?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found in configuration.");
         }
 
         public async Task<bool> CreateRentalAsync(Rental rental)
