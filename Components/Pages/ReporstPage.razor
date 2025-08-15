@@ -12,16 +12,14 @@
 <h3>Generate Reporst</h3>
 
 <div class="">
-    <div class="">
-        <div class="">
-            <button class="btn-outline-secondary" @onclick="SalesByDateSelected"> Sales by Date</button>
-        </div>
-        <div class="">
-            <button class="btn-outline-secondary" @onclick="SalesByCustomerSelected"> Sales by Customer</button>
-        </div>
-        <div class="">
-            <button class="btn-outline-secondary" @onclick="ListByCategorySelected"> List items by Category</button>
-        </div>
+    <div class="btn-group">
+
+        <button type="button" class="btn-outline-secondary" @onclick="SalesByDateSelected"> Sales by Date</button>
+
+        <button type="button" class="btn-outline-secondary" @onclick="SalesByCustomerSelected"> Sales by Customer</button>
+
+        <button type="button" class="btn-outline-secondary" @onclick="ListByCategorySelected"> List items by Category</button>
+
     </div>
     <div class="">
         @if(isSalesByDate) {
