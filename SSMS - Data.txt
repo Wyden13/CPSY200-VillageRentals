@@ -1,34 +1,35 @@
 ﻿USE VillageRentalDB;
 GO
 
--- Clean tables in FK order
+-- =================================================================
+-- STEP 1: Clean and Reset the Database
+-- =================================================================
 DELETE FROM RentalItems;
 DELETE FROM Rentals;
 DELETE FROM Equipment;
 DELETE FROM Categories;
 DELETE FROM Customers;
+GO
 
--- Reset IDENTITY seeds to start at 1
 DBCC CHECKIDENT ('Categories', RESEED, 0);
 DBCC CHECKIDENT ('Customers', RESEED, 0);
 DBCC CHECKIDENT ('Equipment', RESEED, 0);
 DBCC CHECKIDENT ('Rentals', RESEED, 0);
 DBCC CHECKIDENT ('RentalItems', RESEED, 0);
+GO
 
---Category Data
+-- =================================================================
+-- STEP 2: Insert Initial Data
+-- =================================================================
+
+-- Insert Categories
 INSERT INTO Categories (Name) VALUES
-('Power Tools'),
-('Gardening'),
-('Camping Gear'),
-('Construction Equipment'),
-('Party Supplies'),
-('Electronics'),
-('Sports Equipment'),
-('Cleaning Equipment'),
-('Kitchen Appliances'),
-('Audio/Visual Equipment');
+('Power Tools'), ('Gardening'), ('Camping Gear'), ('Construction Equipment'),
+('Party Supplies'), ('Electronics'), ('Sports Equipment'), ('Cleaning Equipment'),
+('Kitchen Appliances'), ('Audio/Visual Equipment');
+GO
 
---Customer Data
+-- Insert Customers
 INSERT INTO Customers (FirstName, LastName, PhoneNumber, Email, IsBanned, DiscountRate) VALUES
 ('John','Smith','555-1001','john.smith1@example.com',0,0.00),
 ('Jane','Johnson','555-1002','jane.johnson2@example.com',0,2.50),
@@ -50,79 +51,48 @@ INSERT INTO Customers (FirstName, LastName, PhoneNumber, Email, IsBanned, Discou
 ('Isabella','Lee','555-1018','isabella.lee18@example.com',0,0.00),
 ('Ryan','Walker','555-1019','ryan.walker19@example.com',0,0.00),
 ('Ava','Hall','555-1020','ava.hall20@example.com',0,5.00);
+GO
 
-
---Equipment Data
+-- Insert Equipment
 INSERT INTO Equipment (Name, Description, DailyRentalCost, IsAvailable, CategoryId) VALUES
-('Electric Drill','Cordless drill with battery and charger',15.00,1,1),
-('Circular Saw','7-inch blade, suitable for wood cutting',18.00,1,1),
-('Lawn Mower','Gas-powered mower, 21-inch blade',20.00,1,2),
-('Leaf Blower','Cordless blower for garden cleanup',10.00,1,2),
-('Tent','4-person waterproof camping tent',25.00,1,3),
-('Sleeping Bag','Warm sleeping bag rated to -5°C',8.00,1,3),
-('Cement Mixer','Electric cement mixer, 2 cubic feet',30.00,1,4),
-('Jackhammer','Electric jackhammer for concrete',35.00,1,4),
-('Folding Table','6-foot folding table for events',8.00,1,5),
-('Sound System','PA system with 2 speakers and mic',40.00,1,5),
-('Projector','HD projector for presentations',35.00,1,6),
-('Laptop','15-inch laptop, Intel i5, 8GB RAM',50.00,1,6),
-('Mountain Bike','21-speed mountain bike',20.00,1,7),
-('Kayak','Single-person kayak with paddle',25.00,1,7),
-('Vacuum Cleaner','Commercial-grade vacuum',15.00,1,8),
-('Pressure Washer','Gas-powered pressure washer',25.00,1,8),
-('Blender','High-speed kitchen blender',8.00,1,9),
-('Microwave Oven','700W microwave oven',10.00,1,9),
-('Microphone','Dynamic microphone',5.00,1,10),
-('Speaker','Bluetooth portable speaker',12.00,1,10);
---Rental Data
-INSERT INTO Rentals (CustomerId, RentalDate, ExpectedReturnDate, ActualReturnDate, TotalCost) VALUES
-(1,GETDATE(),DATEADD(DAY,1,GETDATE()),NULL,0.00),
-(2,GETDATE(),DATEADD(DAY,2,GETDATE()),NULL,0.00),
-(3,DATEADD(DAY,1,GETDATE()),DATEADD(DAY,3,GETDATE()),NULL,0.00),
-(4,GETDATE(),DATEADD(DAY,1,GETDATE()),NULL,0.00),
-(5,DATEADD(DAY,2,GETDATE()),DATEADD(DAY,3,GETDATE()),NULL,0.00),
-(6,GETDATE(),DATEADD(DAY,3,GETDATE()),NULL,0.00),
-(7,DATEADD(DAY,1,GETDATE()),DATEADD(DAY,2,GETDATE()),NULL,0.00),
-(8,GETDATE(),DATEADD(DAY,1,GETDATE()),NULL,0.00),
-(9,GETDATE(),DATEADD(DAY,2,GETDATE()),NULL,0.00),
-(10,DATEADD(DAY,1,GETDATE()),DATEADD(DAY,3,GETDATE()),NULL,0.00),
-(11,GETDATE(),DATEADD(DAY,1,GETDATE()),NULL,0.00),
-(12,GETDATE(),DATEADD(DAY,2,GETDATE()),NULL,0.00),
-(13,DATEADD(DAY,2,GETDATE()),DATEADD(DAY,3,GETDATE()),NULL,0.00),
-(14,GETDATE(),DATEADD(DAY,3,GETDATE()),NULL,0.00),
-(15,GETDATE(),DATEADD(DAY,1,GETDATE()),NULL,0.00),
-(16,DATEADD(DAY,1,GETDATE()),DATEADD(DAY,2,GETDATE()),NULL,0.00),
-(17,GETDATE(),DATEADD(DAY,1,GETDATE()),NULL,0.00),
-(18,GETDATE(),DATEADD(DAY,2,GETDATE()),NULL,0.00),
-(19,DATEADD(DAY,1,GETDATE()),DATEADD(DAY,3,GETDATE()),NULL,0.00),
-(20,GETDATE(),DATEADD(DAY,3,GETDATE()),NULL,0.00);
+('Electric Drill','Cordless drill',15.00,1,1), ('Circular Saw','7-inch blade',18.00,1,1),
+('Lawn Mower','Gas-powered',20.00,1,2), ('Leaf Blower','Cordless blower',10.00,1,2),
+('Tent','4-person waterproof',25.00,1,3), ('Sleeping Bag','Warm sleeping bag',8.00,1,3),
+('Cement Mixer','Electric, 2 cubic feet',30.00,1,4), ('Jackhammer','Electric',35.00,1,4),
+('Folding Table','6-foot folding table',8.00,1,5), ('Sound System','PA system',40.00,1,5),
+('Projector','HD projector',35.00,1,6), ('Laptop','15-inch, Intel i5',50.00,1,6),
+('Mountain Bike','21-speed',20.00,1,7), ('Kayak','Single-person',25.00,1,7),
+('Vacuum Cleaner','Commercial-grade',15.00,1,8), ('Pressure Washer','Gas-powered',25.00,1,8),
+('Blender','High-speed kitchen',8.00,1,9), ('Microwave Oven','700W microwave',10.00,1,9),
+('Microphone','Dynamic microphone',5.00,1,10), ('Speaker','Bluetooth portable',12.00,1,10);
+GO
 
+-- Insert Rentals (with TotalCost initialized to 0)
+INSERT INTO Rentals (CustomerId, RentalDate, ExpectedReturnDate, TotalCost) VALUES
+(1, GETDATE(), DATEADD(DAY,1,GETDATE()), 0.00), (2, GETDATE(), DATEADD(DAY,2,GETDATE()), 0.00),
+(3, DATEADD(DAY,1,GETDATE()), DATEADD(DAY,3,GETDATE()), 0.00), (4, GETDATE(), DATEADD(DAY,1,GETDATE()), 0.00),
+(5, DATEADD(DAY,2,GETDATE()), DATEADD(DAY,3,GETDATE()), 0.00), (6, GETDATE(), DATEADD(DAY,3,GETDATE()), 0.00),
+(7, DATEADD(DAY,1,GETDATE()), DATEADD(DAY,2,GETDATE()), 0.00), (8, GETDATE(), DATEADD(DAY,1,GETDATE()), 0.00),
+(9, GETDATE(), DATEADD(DAY,2,GETDATE()), 0.00), (10, DATEADD(DAY,1,GETDATE()), DATEADD(DAY,3,GETDATE()), 0.00),
+(11, GETDATE(), DATEADD(DAY,1,GETDATE()), 0.00), (12, GETDATE(), DATEADD(DAY,2,GETDATE()), 0.00),
+(13, DATEADD(DAY,2,GETDATE()), DATEADD(DAY,3,GETDATE()), 0.00), (14, GETDATE(), DATEADD(DAY,3,GETDATE()), 0.00),
+(15, GETDATE(), DATEADD(DAY,1,GETDATE()), 0.00), (16, DATEADD(DAY,1,GETDATE()), DATEADD(DAY,2,GETDATE()), 0.00),
+(17, GETDATE(), DATEADD(DAY,1,GETDATE()), 0.00), (18, GETDATE(), DATEADD(DAY,2,GETDATE()), 0.00),
+(19, DATEADD(DAY,1,GETDATE()), DATEADD(DAY,3,GETDATE()), 0.00), (20, GETDATE(), DATEADD(DAY,3,GETDATE()), 0.00);
+GO
 
---Rental Item
+-- Insert Rental Items
 INSERT INTO RentalItems (RentalId, EquipmentId, RentalCost) VALUES
-(1,1,15.00),
-(1,20,15.00),
-(2,2,18.00),
-(2,11,18.00),
-(3,3,20.00),
-(4,4,10.00),
-(5,5,25.00),
-(6,6,8.00),
-(7,7,30.00),
-(8,8,35.00),
-(9,9,8.00),
-(10,10,40.00);
+(1,1,15.00), (1,20,15.00), (2,2,18.00), (2,11,18.00), (3,3,20.00), (4,4,10.00),
+(5,5,25.00), (6,6,8.00), (7,7,30.00), (8,8,35.00), (9,9,8.00), (10,10,40.00);
+GO
 
+-- =================================================================
+-- STEP 4: Apply Business Logic
+-- =================================================================
 
-UPDATE Equipment
-SET IsAvailable = 0
-WHERE Id IN (
-    SELECT DISTINCT ri.EquipmentId
-    FROM RentalItems ri
-    JOIN Rentals r ON ri.RentalId = r.Id
-    WHERE r.ActualReturnDate IS NULL -- Equipment is currently rented out
-);
-
+-- Business Rule 1: Calculate the total cost for each rental.
+PRINT 'Updating rental total costs...';
 UPDATE r
 SET r.TotalCost = (
     SELECT SUM(ri.RentalCost)
@@ -130,5 +100,23 @@ SET r.TotalCost = (
     WHERE ri.RentalId = r.Id
 )
 FROM Rentals r;
+GO
 
+-- Business Rule 2: Mark rented equipment as unavailable.
+PRINT 'Updating equipment availability status...';
+UPDATE Equipment
+SET IsAvailable = 0
+WHERE Id IN (
+    SELECT DISTINCT EquipmentId FROM RentalItems
+);
+GO
+
+-- =================================================================
+-- STEP 5: Verify the Results
+-- =================================================================
+PRINT 'Final Rental Data with Calculated Totals:';
 SELECT * FROM Rentals;
+
+PRINT 'Final Equipment Data with Availability Status:';
+SELECT * FROM Equipment WHERE IsAvailable = 0;
+GO
