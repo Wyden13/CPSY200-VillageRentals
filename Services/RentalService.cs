@@ -37,7 +37,6 @@ namespace VillageRentalManagementSystem.Services
                         command.Parameters.AddWithValue("@CustomerId", rental.customer.Id);
                         command.Parameters.AddWithValue("@RentalDate", DateTime.Now);
                         command.Parameters.AddWithValue("@TotalCost", rental.CalculateTotalCost());
-.
                         var result = await command.ExecuteScalarAsync();
                         newRentalId = Convert.ToInt32(result);
                         rental.Id = newRentalId; 
