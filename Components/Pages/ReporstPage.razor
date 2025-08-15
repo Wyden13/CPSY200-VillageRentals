@@ -1,0 +1,33 @@
+﻿@page "/reports-page"
+@using VillageRentalManagementSystem.Services
+@using VillageRentalManagementSystem.Models
+@inject CustomerService customerService
+@inject EquipmentService equipmentService
+@inject RentalService rentalService
+@inject NavigationManager navigationManager
+
+<h3>Generate Reporst</h3>
+
+<div class="">
+    <div class="">
+        <div class="">
+            <button class="btn-outline-secondary"> Sales by Date</button>
+        </div>
+        <div class="">
+            <button class="btn-outline-secondary"> Sales by Customer</button>
+        </div>
+        <div class="">
+            <button class="btn-outline-secondary"> List items by Category</button>
+        </div>
+    </div>
+    <div class="">
+
+    </div>
+</div>
+
+@code {
+    private bool isSalesByDate = false;
+    private bool isSalesByCustomer = false;
+    private bool isSalesByCategory = false;
+
+}
