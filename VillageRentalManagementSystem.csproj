@@ -68,7 +68,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Components\ManagementServices\" />
       <Folder Include="Data\" />
     </ItemGroup>
 

@@ -1,0 +1,97 @@
+﻿@page "/categories"
+@using VillageRentalManagementSystem.Models
+@using VillageRentalManagementSystem.Services
+@inject CategoryService categoryService
+
+<h3>CategoryPage</h3>
+
+<div class="container">
+    <div class="row mb-3">
+        <div class="col-8">
+            <h4>Equipment List</h4>
+        </div>
+        <div class="col-4">
+            <button class="btn btn-primary w-100" @onclick="ShowAddCategoryModal">Add Category</button>
+        </div>
+    </div>
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <td>Category Id</td>
+                <td>Category Name</td>
+            </tr>
+        </thead>
+        <tbody>
+            @if (categories.Any())
+            {
+                @foreach(var category in categories)
+                {
+                    <tr>
+                        <td>category.Id</td>
+                        <td>category.Name</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+@if (showCategoryModal)
+{
+    <div class="modal show d-block" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Category</h5>
+                    <button type="button" class="btn-close" @onclick=CloseCategoryModal></button>
+
+                </div>
+                <div class="modal-body">
+                    <div class="mb-2">
+                        <label class="form-label">Category ID</label>
+                        <input class="form-control" @bind="newCategory.Id" />
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Category Name</label>
+                        <input class="form-control" @bind="newCategory.Name"/>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick=CloseCategoryModal>Close</button>
+                    <button type="button" class="btn btn-primary" @onclick="AddCategory">Add Category</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop show"></div>
+
+}
+
+@code {
+    private List<Category> categories = new();
+    private bool showCategoryModal = false;
+    private Category? newCategory;
+
+    private void ShowAddCategoryModal()
+    {
+        newCategory = new Category();
+        showCategoryModal = true;
+    }
+    private void CloseCategoryModal()
+    {
+        showCategoryModal = false;
+    }
+    private async Task AddCategory()
+    {
+        if (newCategory == null || string.IsNullOrWhiteSpace(newCategory.Name))
+        {
+            return;
+        }
+        var successCheck = await categoryService.AddCategoryAsync(newCategory);
+        if (successCheck)
+        {
+            categories.Add(newCategory);
+            showCategoryModal = false;
+            newCategory = null;
+        }
+    }
+}

@@ -16,5 +16,8 @@ namespace VillageRentalManagementSystem.Models
             Id = id;
             Name = name;
         }
+        public Category()
+        {
+        }
     }
 }

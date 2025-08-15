@@ -13,6 +13,7 @@ namespace VillageRentalManagementSystem.Services
         public RentalService(IConfiguration configuration)
         {
             connectionString = configuration.GetConnectionString("DefaultConnection");
+                //?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found in configuration.");
         }
 
         public async Task<bool> CreateRentalAsync(Rental rental)

@@ -124,12 +124,12 @@
 
 
 @code {
-    private Customer selectedCustomer;
-    private Equipment foundEquipment;
+    private Customer? selectedCustomer = new();
+    private Equipment? foundEquipment = new();
     private List<RentalItem> shoppingCart = new List<RentalItem>();
-    private string customerSearchTerm;
-    private string equipmentSearchTerm;
-    private string message;
+    private string customerSearchTerm= "";
+    private string equipmentSearchTerm = "";
+    private string message = "";
 
     private double TotalCost => shoppingCart.Sum(item => item.rentalCost);
 
@@ -204,6 +204,7 @@
 
     private async Task Checkout()
     {
+        if (selectedCustomer == null) return;
         var newRental = new Rental(0, selectedCustomer, shoppingCart);
 
         bool success = await rentalService.CreateRentalAsync(newRental);
