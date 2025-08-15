@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using VillageRentalManagementSystem.Models;
+using VillageRentalManagementSystem;
 
 namespace VillageRentalManagementSystem.Services
 {
@@ -10,10 +11,12 @@ namespace VillageRentalManagementSystem.Services
     {
         private readonly string _connectionString;
 
-        public CustomerService(IConfiguration configuration)
+        public CustomerService()
         {
 #pragma warning disable CS8601 // Possible null reference assignment.
-            _connectionString = "Server=(localdb)\\MSSQLLocalDB;Initial Catalog=VillageRentalDB;Integrated Security=True";
+            //_connectionString = configuration.GetConnectionString("DefaultConnection");
+            _connectionString = "Server=(localdb)\\MSSQLLocalDB;Database=VillageRentalDB;Trusted_Connection=True;";
+
 #pragma warning restore CS8601 // Possible null reference assignment.
         }
 

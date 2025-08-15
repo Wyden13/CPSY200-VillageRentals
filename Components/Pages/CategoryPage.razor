@@ -17,8 +17,8 @@
     <table class="table table-hover">
         <thead>
             <tr>
-                <td>Category Id</td>
-                <td>Category Name</td>
+                <th scope="col">Category Id</th>
+                <th scope="col">Category Name</th>
             </tr>
         </thead>
         <tbody>
@@ -26,10 +26,11 @@
             {
                 @foreach(var category in categories)
                 {
-                    <tr>
-                        <td>category.Id</td>
-                        <td>category.Name</td>
-                    </tr>
+                   <tr>
+                       <td scope="row">@category.Id</td>
+                        <td>@category.Name</td>
+
+                   </tr>
                 }
             }
         </tbody>
@@ -47,11 +48,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="mb-2">
-                        <label class="form-label">Category ID</label>
-                        <input class="form-control" @bind="newCategory.Id" />
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label">Category Name</label>
+                        <label class="form-label">Category Name:</label>
                         <input class="form-control" @bind="newCategory.Name"/>
                     </div>
                 </div>
@@ -71,6 +68,10 @@
     private bool showCategoryModal = false;
     private Category? newCategory;
 
+    protected override async Task OnInitializedAsync()
+    {
+        categories = await categoryService.GetAllCategoriesAsync();
+    }
     private void ShowAddCategoryModal()
     {
         newCategory = new Category();

@@ -10,9 +10,10 @@ namespace VillageRentalManagementSystem.Services
     {
         private readonly string connectionString;
 
-        public EquipmentService(IConfiguration configuration)
+        public EquipmentService()
         {
-            connectionString = "Server=(localdb)\\MSSQLLocalDB;Initial Catalog=VillageRentalDB;Integrated Security=True";
+            connectionString = "Server=(localdb)\\MSSQLLocalDB;Database=VillageRentalDB;Trusted_Connection=True;";
+
         }
 
 

@@ -100,3 +100,4 @@ PRINT '4. Set "(Is Identity)" to "Yes".';
 PRINT '5. Save the table. Repeat for all tables with an "Id" column.';
 PRINT '=================================================================';
 GO
+

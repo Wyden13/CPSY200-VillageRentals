@@ -10,9 +10,10 @@ namespace VillageRentalManagementSystem.Services
     {
         private readonly string _connectionString;
 
-        public CategoryService(IConfiguration configuration)
+        public CategoryService()
         {
-            _connectionString = "Server=(localdb)\\\\MSSQLLocalDB;Initial Catalog=VillageRentalDB;Integrated Security=True";
+            _connectionString = "Server=(localdb)\\MSSQLLocalDB;Database=VillageRentalDB;Trusted_Connection=True;";
+
         }
 
         public async Task<List<Category>> GetAllCategoriesAsync()
@@ -22,7 +23,7 @@ namespace VillageRentalManagementSystem.Services
             using (var connection = new SqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
-                var query = "SELECT Id, Name FROM Categories ORDER BY Name";
+                var query = "SELECT Id, Name FROM Categories ORDER BY Id";
                 using (var command = new SqlCommand(query, connection))
                 {
                     using (var reader = await command.ExecuteReaderAsync())
