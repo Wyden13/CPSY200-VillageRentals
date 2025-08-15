@@ -51,7 +51,7 @@ namespace VillageRentalManagementSystem.Services
                         ON r.Id = ri.RentalId
                     WHERE CAST(r.RentalDate AS DATE) = @SalesDate
                         GROUP BY
-                            CAST(r.RentalDate AS DATE),
+                            r.RentalDate,
                             r.Id,
                             c.FirstName,
                             c.LastName,

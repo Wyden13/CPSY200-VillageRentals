@@ -12,7 +12,7 @@ namespace VillageRentalManagementSystem.Services
 
         public CategoryService()
         {
-            _connectionString = "Server=(localdb)\\\\MSSQLLocalDB;Initial Catalog=VillageRentalDB;Integrated Security=True";
+            _connectionString = "Server=(localdb)\\MSSQLLocalDB;Initial Catalog=VillageRentalDB;Integrated Security=True";
         }
 
         public async Task<List<Category>> GetAllCategoriesAsync()

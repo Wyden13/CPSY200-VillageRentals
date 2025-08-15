@@ -1,11 +1,13 @@
 ﻿@page "/reports-page"
 @using VillageRentalManagementSystem.Services
 @using VillageRentalManagementSystem.Models
+@using VillageRentalManagementSystem.Models.Reports
 @inject CustomerService customerService
 @inject EquipmentService equipmentService
 @inject CategoryService categoryService
 @inject RentalService rentalService
 @inject NavigationManager navigationManager
+@inject ReportService reportService
 
 <h3>Generate Reporst</h3>
 
@@ -24,8 +26,11 @@
     <div class="">
         @if(isSalesByDate) {
             <div class="md-3">
-                <label class="form-label">Date and Time:</label>
-                <input type="datetime-local" @bind="selectedDate" class="form-control" />
+                <label class="form-label">Date:</label>
+                <input type="datetime-local" @bind="selectedDate" class="form-control" />             
+            </div>
+            <div>
+                <button @onclick="SelectDate">Generate</button>
             </div>
         }
         @if(isSalesByCustomer) {
@@ -39,6 +44,9 @@
                     }
                 </select>
             </div>
+            <div>
+                <button>Generate</button>
+            </div>
         }
         @if (isListByCategory) {
             <div class="md-3">
@@ -51,19 +59,39 @@
                     }
                 </select>
             </div>
+            <div>
+                <button>Generate</button>
+            </div>
         }
     </div>
 
     <div>
         <div>
-            @if(isSalesByDate || selectedDate != null)
+            @if (isSalesByDate && dailySales != null)
             {
             <table>
                 <thead>
                     <tr>
-                        <td></td>
+                        <td>Rental Id: </td>
+                        <td>Customer First Name: </td>
+                        <td>Customer Last Name: </td>
+                        <td>Number of Items: </td>
+                        <td>Total Sale: </td>
                     </tr>
                 </thead>
+                <tbody>
+                    @foreach (DailySalesReportItem item in dailySales)
+                    {
+                        <tr>
+                            <td>@item.RentalId</td>
+                            <td>@item.CustFirstName</td>
+                            <td>@item.CustLastName</td>
+                            <td>@item.NumberOfItems</td>
+                            <td>@item.TotalSales</td>
+                        </tr>        
+                    }
+                    <div> Total Sale for @selectedDate.ToShortDateString() is = $@TotalSalesOfDate</div>
+                </tbody>
             </table>
             }
         </div>
@@ -78,14 +106,18 @@
     private int CustomerID { get; set; }
     private int CategoryID { get; set; }
 
+    private double TotalSalesOfDate = 0;
+
     private DateTime selectedDate;
     private Customer selectedCustomer;
     private List<Customer> customers;
     private List<Category> categories;
     private Category selectedCategory;
+    List<DailySalesReportItem> dailySales;
 
     protected override async Task OnInitializedAsync()
     {
+        selectedDate = DateTime.Now;
         customers = await customerService.GetAllCustomersAsync();
         categories = await categoryService.GetAllCategoriesAsync();
     }
@@ -95,6 +127,14 @@
         isSalesByDate = true;
         isSalesByCustomer = false;
         isListByCategory = false;
+    }
+    private async Task SelectDate()
+    {
+        if (selectedDate != null)
+        {
+            dailySales = await reportService.GetSalesByDateAsync(selectedDate);
+            dailySales.ForEach(e => TotalSalesOfDate += decimal.ToDouble(e.TotalSales));
+        }
     }
     private void SalesByCustomerSelected()
     {
