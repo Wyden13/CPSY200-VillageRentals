@@ -93,6 +93,30 @@
                     <div> Total Sale for @selectedDate.ToShortDateString() is = $@TotalSalesOfDate</div>
                 </tbody>
             </table>
+            }<!-- end sales by date -->
+            @if (isSalesByCustomer && customerSales != null)
+            {
+            <table>
+                <thead>
+                    <tr>
+                        <td>Customer Id: </td>
+                        <td>Customer First Name: </td>
+                        <td>Customer Last Name: </td>
+                        <td>Total Amount Spent : </td>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (CustomerSalesReportItem item in customerSales)
+                    {
+                        <tr>
+                            <td>@item.CustomerId</td>
+                            <td>@item.FirstName</td>
+                            <td>@item.LastName</td>
+                            <td>@item.TotalAmountSpent</td>
+                        </tr>        
+                    }
+                </tbody>
+            </table>
             }
         </div>
     </div>
@@ -110,10 +134,12 @@
 
     private DateTime selectedDate;
     private Customer selectedCustomer;
-    private List<Customer> customers;
     private List<Category> categories;
     private Category selectedCategory;
-    List<DailySalesReportItem> dailySales;
+    private List<Customer> customers;
+
+    private List<DailySalesReportItem> dailySales;
+    private List<CustomerSalesReportItem> customerSales;
 
     protected override async Task OnInitializedAsync()
     {
@@ -142,6 +168,7 @@
         isSalesByCustomer = true;
         isListByCategory = false;
     }
+
     private void ListByCategorySelected()
     {
         isSalesByDate = false;
