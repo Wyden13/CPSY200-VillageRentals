@@ -1,0 +1,70 @@
+﻿/* Main card container for the reports page */
+.card {
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    overflow: hidden; 
+}
+
+.card-header {
+    background-color: var(--sidebar-bg);
+    padding: 0;
+    border-bottom: none;
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+/* Styling for the date input and generate button */
+.form-label {
+    font-weight: 600;
+    color: var(--sidebar-bg);
+}
+
+.btn-success {
+    font-weight: bold;
+    padding: 0.5rem 1.5rem;
+}
+
+/* Styling for the report tables */
+.table {
+    margin-top: 1.5rem;
+    border-collapse: separate;
+    border-spacing: 0 0.5rem; /* Add space between rows */
+}
+
+    .table thead th {
+        background-color: var(--sidebar-bg);
+        color: var(--primary-button-text);
+        border: none;
+    }
+
+    .table tbody tr {
+        background-color: #fff;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        transition: all 0.2s ease-in-out;
+    }
+
+.table-hover tbody tr:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    background-color: var(--top-row-bg) !important;
+    color: var(--sidebar-bg);
+}
+
+.table td, .table th {
+    border: none;
+    vertical-align: middle;
+}
+
+/* Styling for the total sales footer in the daily report */
+.table tfoot tr.table-info {
+    background-color: var(--top-row-bg);
+    color: var(--sidebar-bg);
+    font-size: 1.1rem;
+}
+
+h4 {
+    color: var(--sidebar-bg);
+}
