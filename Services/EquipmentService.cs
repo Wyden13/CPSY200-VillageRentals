@@ -16,7 +16,41 @@ namespace VillageRentalManagementSystem.Services
 
         }
 
+        public async Task<List<Equipment>> GetAllAvailableEquipmentAsync()
+        {
+            var equipmentList = new List<Equipment>();
+            using (var connection = new SqlConnection(connectionString))
+            {
+                await connection.OpenAsync();
+                var query = @"
+            SELECT eq.Id, eq.Name, eq.Description, eq.DailyRentalCost, eq.IsAvailable, cat.Name AS CategoryName
+            FROM Equipment eq
+            LEFT JOIN Categories cat ON eq.CategoryId = cat.Id
+            WHERE eq.IsAvailable = 1
+            ORDER BY eq.Name";
 
+                using (var command = new SqlCommand(query, connection))
+                {
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            var equipment = new Equipment
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                Name = reader.GetString(reader.GetOrdinal("Name")),
+                                Description = reader.GetString(reader.GetOrdinal("Description")),
+                                DailyRentalCost = (double)reader.GetDecimal(reader.GetOrdinal("DailyRentalCost")),
+                                IsAvailable = reader.GetBoolean(reader.GetOrdinal("IsAvailable")),
+                                Category = new Category { Name = reader.IsDBNull(reader.GetOrdinal("CategoryName")) ? "Uncategorized" : reader.GetString(reader.GetOrdinal("CategoryName")) }
+                            };
+                            equipmentList.Add(equipment);
+                        }
+                    }
+                }
+            }
+            return equipmentList;
+        }
         public async Task<Equipment> FindEquipmentAsync(string searchTerm)
         {
             Equipment equipment = null;

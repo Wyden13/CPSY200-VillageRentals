@@ -90,57 +90,99 @@
         <div class="col-md-6">
             <h4>2. Find Equipment</h4>
             <div class="card p-3">
-                <div class="input-group">
-                    <input type="text" class="form-control" placeholder="Enter Equipment ID or Name..." @bind="equipmentSearchTerm" />
-                    <button class="btn btn-primary" @onclick="FindEquipment">Find</button>
+                <div class="d-grid">
+                    <button class="btn btn-primary" @onclick="OpenEquipmentModal">
+                        <i class="bi bi-search me-2"></i> Browse Equipment
+                    </button>
                 </div>
 
                 @if (foundEquipment != null)
                 {
                     <hr />
-                    <h5>Equipment Details</h5>
+                    <h5>Equipment to Add</h5>
                     <p>
                         <strong>Name:</strong> @foundEquipment.Name<br />
                         <strong>Daily Cost:</strong> @foundEquipment.DailyRentalCost.ToString("C")
                     </p>
 
-                    @if (foundEquipment.IsAvailable)
-                    {
-                        <div class="row align-items-end">
-                            <div class="col">
-                                <label>Return Date:</label>
-                                <input type="date" class="form-control" @bind="itemReturnDate" />
-                            </div>
-                            <div class="col-auto">
-                                <button class="btn btn-success" @onclick="AddToCart">Add to Cart</button>
-                            </div>
+                    <div class="row align-items-end">
+                        <div class="col">
+                            <label>Return Date:</label>
+                            <input type="date" class="form-control" @bind="itemReturnDate" />
                         </div>
-                    }
-                    else
-                    {
-                        <div class="alert alert-warning">This item is currently unavailable.</div>
-                    }
+                        <div class="col-auto">
+                            <button class="btn btn-success" @onclick="AddToCart">Add to Cart</button>
+                        </div>
+                    </div>
                 }
             </div>
         </div>
     </div>
 </div>
 
+<!-- Equipment Selection Modal -->
+@if (showEquipmentModal)
+{
+    <div class="modal show d-block" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Select Equipment</h5>
+                    <button type="button" class="btn-close" @onclick="CloseEquipmentModal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" class="form-control mb-3" placeholder="Search available equipment..." @oninput="FilterEquipment" />
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th class="text-end">Daily Cost</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var equipment in filteredEquipmentList)
+                            {
+                                <tr>
+                                    <td>@equipment.Name</td>
+                                    <td>@equipment.Category.Name</td>
+                                    <td class="text-end">@equipment.DailyRentalCost.ToString("C")</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary" @onclick="() => SelectEquipment(equipment)">Select</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop show"></div>
+}
+
+
 @code {
     private Customer? selectedCustomer;
     private Equipment? foundEquipment;
     private List<RentalItem> shoppingCart = new();
     private string customerSearchTerm = "";
-    private string equipmentSearchTerm = "";
     private string message = "";
-
     private DateTime itemReturnDate;
-
     private double TotalCost => shoppingCart.Sum(item => item.rentalCost);
 
-    protected override void OnInitialized()
+    // For the equipment modal
+    private bool showEquipmentModal = false;
+    private List<Equipment> allAvailableEquipment = new();
+    private List<Equipment> filteredEquipmentList = new();
+    private string equipmentSearchFilter = "";
+
+    protected override async Task OnInitializedAsync()
     {
         itemReturnDate = DateTime.Today.AddDays(1);
+        allAvailableEquipment = await equipmentService.GetAllAvailableEquipmentAsync();
+        filteredEquipmentList = allAvailableEquipment;
     }
 
     private async Task FindCustomer()
@@ -150,16 +192,6 @@
         {
             selectedCustomer = await customerService.FindCustomerAsync(customerSearchTerm);
             if (selectedCustomer == null) message = "Customer not found.";
-        }
-    }
-
-    private async Task FindEquipment()
-    {
-        message = string.Empty;
-        if (!string.IsNullOrWhiteSpace(equipmentSearchTerm))
-        {
-            foundEquipment = await equipmentService.FindEquipmentAsync(equipmentSearchTerm);
-            if (foundEquipment == null) message = "Equipment not found.";
         }
     }
 
@@ -189,15 +221,44 @@
             var rentalItem = new RentalItem
             {
                 equipment = foundEquipment,
-                ExpectedReturnDate = itemReturnDate, // Corrected property name
+                ExpectedReturnDate = itemReturnDate,
                 rentalCost = foundEquipment.DailyRentalCost * rentalDays
             };
 
             shoppingCart.Add(rentalItem);
             message = $"{rentalItem.equipment.Name} added to cart!";
+            foundEquipment = null; // Clear after adding
+        }
+    }
 
-            foundEquipment = null;
-            equipmentSearchTerm = string.Empty;
+    private void OpenEquipmentModal()
+    {
+        showEquipmentModal = true;
+    }
+
+    private void CloseEquipmentModal()
+    {
+        showEquipmentModal = false;
+    }
+
+    private void SelectEquipment(Equipment equipment)
+    {
+        foundEquipment = equipment;
+        CloseEquipmentModal();
+    }
+
+    private void FilterEquipment(ChangeEventArgs e)
+    {
+        equipmentSearchFilter = e.Value.ToString();
+        if (string.IsNullOrWhiteSpace(equipmentSearchFilter))
+        {
+            filteredEquipmentList = allAvailableEquipment;
+        }
+        else
+        {
+            filteredEquipmentList = allAvailableEquipment
+                .Where(eq => eq.Name.Contains(equipmentSearchFilter, StringComparison.OrdinalIgnoreCase))
+                .ToList();
         }
     }
 
@@ -221,7 +282,7 @@
         {
             customer = selectedCustomer,
             items = shoppingCart,
-            ExpectedReturnDate = shoppingCart.Max(item => item.ExpectedReturnDate) 
+            ExpectedReturnDate = shoppingCart.Max(item => item.ExpectedReturnDate)
         };
 
         bool success = await rentalService.CreateRentalAsync(newRental);
@@ -237,12 +298,14 @@
         }
     }
 
-    private void ResetPage()
+    private async Task ResetPage()
     {
         selectedCustomer = null;
         customerSearchTerm = string.Empty;
         foundEquipment = null;
-        equipmentSearchTerm = string.Empty;
         shoppingCart.Clear();
+        // Refresh the list of available equipment after a rental is created
+        allAvailableEquipment = await equipmentService.GetAllAvailableEquipmentAsync();
+        filteredEquipmentList = allAvailableEquipment;
     }
 }
