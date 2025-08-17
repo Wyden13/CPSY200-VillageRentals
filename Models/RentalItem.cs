@@ -11,6 +11,8 @@ namespace VillageRentalManagementSystem.Models
         public Equipment equipment;
         public DateTime rentalDate;
         public DateTime returnDAte;
+        public DateTime expectedReturnDAte;
+
         public double rentalCost;
 
         public RentalItem()
