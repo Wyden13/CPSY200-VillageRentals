@@ -12,6 +12,9 @@ namespace VillageRentalManagementSystem.Models
     {
         public int Id { get; set; }
         public Customer customer;
+        public DateTime RentalDate { get; set; }
+        public DateTime ExpectedReturnDate { get; set; }
+        public DateTime ActualReturnDate { get; set; }
         
         public List<RentalItem> items;
 
@@ -24,6 +27,13 @@ namespace VillageRentalManagementSystem.Models
             Id = id;
             this.customer = customer;
             this.items = items;
+        }
+
+        public Rental(int id, Customer customer, DateTime rentalDate, DateTime expectedReturnDate, DateTime actualReturnDate) : this(id, customer)
+        {
+            RentalDate = rentalDate;
+            ExpectedReturnDate = expectedReturnDate;
+            ActualReturnDate = actualReturnDate;
         }
 
         public Rental(int id, Customer customer)

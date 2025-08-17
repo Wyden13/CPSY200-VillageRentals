@@ -104,7 +104,7 @@ namespace VillageRentalManagementSystem.Services
             {
                 await connection.OpenAsync();
                 var query = @"
-                    SELECT r.Id AS RentalId, r.CustomerId, r.RentalDate, r.ExpectedReturnDate  c.FirstName, c.LastName, 
+                    SELECT r.Id AS RentalId, r.CustomerId, r.RentalDate, r.ExpectedReturnDate,  c.FirstName, c.LastName, 
                     FROM Rentals r
                     JOIN Customers c ON r.CustomerId = c.Id
                     WHERE r.ActualReturnDate
@@ -124,7 +124,6 @@ namespace VillageRentalManagementSystem.Services
                                 Description = reader.GetString(reader.GetOrdinal("Description")),
                                 DailyRentalCost = (double)reader.GetDecimal(reader.GetOrdinal("DailyRentalCost")),
                                 IsAvailable = reader.GetBoolean(reader.GetOrdinal("IsAvailable"))
-                                //create a new Category object for the equipment
                             };
                             rentalList.Add(rental);
                         }
