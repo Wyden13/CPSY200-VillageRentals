@@ -7,7 +7,7 @@
 
 
 
-<h3>Rentals</h3>
+<h3>Manage Rentals</h3>
 @if (!string.IsNullOrWhiteSpace(message))
 {
     <div class="alert alert-info" role="alert">
@@ -16,54 +16,53 @@
 }
 
 <div class="container">
-    <div class="row mb-3">
+    @* <div class="row mb-3">
         <div class="col-8">
-            @* <h4>Equipment List</h4> *@
+             <h4>Equipment List</h4> 
         </div>
         <div class="col-4">
-            <button class="btn btn-primary w-100" @onclick="ShowAddEquipmentModal">Add Equipment</button>
-        </div>
-    </div>
+            <button class="btn btn-primary w-100" @onclick="ShowAddEquipmentModal">Return Equipment</button>
+        </div> 
+    </div> *@
     <table class="table table-hover">
         <thead>
             <tr>
-                <th scope="col">ID</th>
-                <th scope="col">Name</th>
-                <th scope="col">Description</th>
-                <th scope="col">Daily Rental Cost</th>
-                <th scope="col">Category</th>
-                <th scope="col">Availability</th>
-
-                <th scope="col">Actions</th>
+                <th scope="col">Rental ID</th>
+                <th scope="col">Customer Name</th>
+                <th scope="col">Customer Email</th>
+                <th scope="col">Total Cost</th>
+                <th scope="col">Rental Date</th>
+                <th scope="col">Expected Date</th>
+                <th scope="col"></th>
             </tr>
         </thead>
         <tbody>
             @if (rentalList.Any())
             {
-                @foreach (var equipment in rentalList)
+                @foreach (Rental rental in rentalList)
                 {
                     <tr>
-                        <td>@equipment.Id</td>
-                        <td>@equipment.Name</td>
-                        <td>@equipment.Description</td>
-                        <td>@equipment.DailyRentalCost.ToString("C")</td>
-                        <td>@(equipment.Category?.Name ?? "Uncategorized")</td>
-                        <td>@(equipment.IsAvailable ? "Yes" : "No")</td>
+                        <td>@rental.Id</td>
+                        <td>@rental.customer.FirstName @rental.customer.LastName </td>
+                        <td>@rental.customer.Email</td>
+                        <td>@rental.TotalCost</td>
+                        <td>@rental.RentalDate.ToShortDateString()</td>
+                        <td>@rental.ExpectedReturnDate.ToShortDateString()</td>
                         <td>
-                            <button class="btn btn-danger" @onclick="() => DeleteEquipment(equipment)">Delete</button>
+                            <button class="btn btn-secondary" @onclick="() => ReturnRental(rental.Id)">Process Return</button>
                         </td>
                     </tr>
                 }
             }
             else
             {
-                <tr><td colspan="6" class="text-center">No equipment available.</td></tr>
+                <tr><td colspan="6" class="text-center">No rental available.</td></tr>
             }
         </tbody>
     </table>
 </div>
 
-@if (showEquipmentModal)
+@* @if (showEquipmentModal)
 {
     <div class="modal show d-block" tabindex="-1">
         <div class="modal-dialog">
@@ -118,7 +117,7 @@
     </div>
     <div class="modal-backdrop show"></div>
 
-}
+} *@
 
 @code {
     private List<Rental> rentalList = new();

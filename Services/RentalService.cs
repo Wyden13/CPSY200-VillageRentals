@@ -1,6 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using System;
+using System.Data;
 using System.Threading.Tasks;
 using VillageRentalManagementSystem.Models;
 
@@ -99,16 +100,16 @@ namespace VillageRentalManagementSystem.Services
 
         public async Task<List<Rental>> GetAllRentalAsync()
         {
-            var rentalList= new List<Equipment>();
+            var rentalList= new List<Rental>();
             using (var connection = new SqlConnection(connectionString))
             {
                 await connection.OpenAsync();
                 var query = @"
-                    SELECT r.Id AS RentalId, r.CustomerId, r.RentalDate, r.ExpectedReturnDate,  c.FirstName, c.LastName, 
+                    SELECT r.Id AS RentalId, r.RentalDate, r.ExpectedReturnDate, r.TotalCost, r.CustomerId AS CustomerId, c.FirstName, c.LastName, c.Email
                     FROM Rentals r
                     JOIN Customers c ON r.CustomerId = c.Id
-                    WHERE r.ActualReturnDate
-                    ORDER BY r.RentalDate";
+                    WHERE r.ActualReturnDate IS NOT NULL
+                    ORDER BY r.ExpectedReturnDate";
 
                 using (var command = new SqlCommand(query, connection))
                 {
@@ -118,19 +119,24 @@ namespace VillageRentalManagementSystem.Services
                         {
                             var rental = new Rental
                             {
-                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                                customer = new Customer(0, reader.GetString(reader.GetOrdinal("CategoryName"))),
-                                Name = reader.GetString(reader.GetOrdinal("Name")),
-                                Description = reader.GetString(reader.GetOrdinal("Description")),
-                                DailyRentalCost = (double)reader.GetDecimal(reader.GetOrdinal("DailyRentalCost")),
-                                IsAvailable = reader.GetBoolean(reader.GetOrdinal("IsAvailable"))
+                                Id = reader.GetInt32(reader.GetOrdinal("RentalId")),
+                                customer = new Customer
+                                    {
+                                        Id = reader.GetInt32(reader.GetOrdinal("CustomerId")),
+                                        FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                        LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                                        Email = reader.GetString(reader.GetOrdinal("Email")),
+                                    },
+                                RentalDate = reader.GetDateTime(reader.GetOrdinal("RentalDate")),
+                                ExpectedReturnDate = reader.GetDateTime(reader.GetOrdinal("ExpectedReturnDate"))
                             };
+                            rental.TotalCost = (double)reader.GetDecimal(reader.GetOrdinal("TotalCost"));
                             rentalList.Add(rental);
                         }
                     }
                 }
             }
-            return equipmentList;
+            return rentalList;
         }
     }
 }

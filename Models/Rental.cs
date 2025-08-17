@@ -15,6 +15,7 @@ namespace VillageRentalManagementSystem.Models
         public DateTime RentalDate { get; set; }
         public DateTime ExpectedReturnDate { get; set; }
         public DateTime ActualReturnDate { get; set; }
+        public double TotalCost { get; set; }
         
         public List<RentalItem> items;
 
@@ -29,11 +30,10 @@ namespace VillageRentalManagementSystem.Models
             this.items = items;
         }
 
-        public Rental(int id, Customer customer, DateTime rentalDate, DateTime expectedReturnDate, DateTime actualReturnDate) : this(id, customer)
+        public Rental(int id, Customer customer, DateTime rentalDate, DateTime expectedReturnDate) : this(id, customer)
         {
             RentalDate = rentalDate;
             ExpectedReturnDate = expectedReturnDate;
-            ActualReturnDate = actualReturnDate;
         }
 
         public Rental(int id, Customer customer)
@@ -51,6 +51,7 @@ namespace VillageRentalManagementSystem.Models
             {
                 totalCost += item.rentalCost;
             }
+
             return totalCost;
         }
 
