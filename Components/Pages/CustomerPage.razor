@@ -47,8 +47,8 @@
                             </span>
                         </td>
                         <td>
-                            <button class="btn btn-sm btn-secondary" @onclick="() => ShowEditCustomerModal(customer)">Edit</button>
-                            <button class="btn btn-sm btn-danger" @onclick="() => DeleteCustomer(customer.Id)">Delete</button>
+                            <button class="btn btn-sm btn-secondary" @onclick="() => ShowEditCustomerModal(customer)"><i class="bi bi-pencil-fill"></i></button>
+                            <button class="btn btn-sm btn-danger" @onclick="() => DeleteCustomer(customer.Id)"><i class="bi bi-trash-fill"></i></button>
                         </td>
                     </tr>
                 }
