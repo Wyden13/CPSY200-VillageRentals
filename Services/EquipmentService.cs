@@ -153,6 +153,33 @@ namespace VillageRentalManagementSystem.Services
                 }
             }
         }
+
+        public async Task<bool> UpdateEquipmentAsync(Equipment equipment)
+        {
+            using (var connection = new SqlConnection(connectionString))
+            {
+                await connection.OpenAsync();
+                var query = @"
+                    UPDATE Equipment 
+                    SET Name = @Name, 
+                        Description = @Description, 
+                        DailyRentalCost = @DailyRentalCost, 
+                        CategoryId = @CategoryId
+                    WHERE Id = @Id";
+
+                using (var command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@Id", equipment.Id);
+                    command.Parameters.AddWithValue("@Name", equipment.Name);
+                    command.Parameters.AddWithValue("@Description", equipment.Description);
+                    command.Parameters.AddWithValue("@DailyRentalCost", equipment.DailyRentalCost);
+                    command.Parameters.AddWithValue("@CategoryId", (object)equipment.Category?.Id ?? DBNull.Value);
+
+                    int result = await command.ExecuteNonQueryAsync();
+                    return result > 0;
+                }
+            }
+        }
         public async Task<bool> DeleteEquipmentAsync(int equipmentId)
         {
             using (var connection = new SqlConnection(connectionString))

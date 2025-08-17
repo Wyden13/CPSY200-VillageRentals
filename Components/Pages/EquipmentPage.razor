@@ -4,9 +4,8 @@
 @inject EquipmentService equipmentService
 @inject CategoryService categoryService
 
+<h3>Manage Inventory</h3>
 
-
-<h3>EquipmentPage</h3>
 @if (!string.IsNullOrWhiteSpace(message))
 {
     <div class="alert alert-info" role="alert">
@@ -16,24 +15,22 @@
 
 <div class="container">
     <div class="row justify-content-end mb-3">
-        @* <div class="col-8">
-            <h4>Equipment List</h4> 
-        </div> *@
         <div class="col-4">
-            <button class="btn btn-primary w-100" @onclick="ShowAddEquipmentModal">Add Equipment</button>
+            <button class="btn btn-primary w-100" @onclick="ShowAddEquipmentModal">
+                <i class="bi bi-plus-circle-fill me-2"></i>Add Equipment
+            </button>
         </div>
     </div>
     <table class="table table-hover">
         <thead>
             <tr>
-                <th scope="col">ID</th>
-                <th scope="col">Name</th>
-                <th scope="col">Description</th>
-                <th scope="col">Daily Rental Cost</th>
-                <th scope="col">Category</th>
-                <th scope="col">Availability</th>
-
-                <th scope="col">Actions</th>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Daily Cost</th>
+                <th>Category</th>
+                <th>Availability</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -47,16 +44,25 @@
                         <td>@equipment.Description</td>
                         <td>@equipment.DailyRentalCost.ToString("C")</td>
                         <td>@(equipment.Category?.Name ?? "Uncategorized")</td>
-                        <td>@(equipment.IsAvailable? "Yes":"No")</td>
                         <td>
-                            <button class="btn btn-danger" @onclick="() => DeleteEquipment(equipment)">Delete</button>
+                            <span class="badge @(equipment.IsAvailable ? "bg-success" : "bg-warning text-dark")">
+                                @(equipment.IsAvailable ? "Available" : "Rented Out")
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-secondary" @onclick="() => ShowEditEquipmentModal(equipment)">
+                                <i class="bi bi-pencil-fill"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" @onclick="() => DeleteEquipment(equipment)">
+                                <i class="bi bi-trash-fill"></i>
+                            </button>
                         </td>
                     </tr>
                 }
             }
             else
             {
-                <tr><td colspan="6" class="text-center">No equipment available.</td></tr>
+                <tr><td colspan="7" class="text-center">No equipment available.</td></tr>
             }
         </tbody>
     </table>
@@ -68,43 +74,26 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Add Equipment</h5>
-                    <button type="button" class="btn-close" @onclick=CloseEquipmentModal></button>
+                    <h5 class="modal-title">@modalTitle</h5>
+                    <button type="button" class="btn-close" @onclick="CloseEquipmentModal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-2">
-                        <label for="equipmentName" class="form-label">Name:</label>
-                        <input 
-                            type="text" 
-                            class="form-control" 
-                            id="equipmentName" 
-                            placeholder="Equipment Name" 
-                            @bind="equipment.Name"
-                        >
+                        <label class="form-label">Name:</label>
+                        <input type="text" class="form-control" @bind="modalEquipment.Name">
                     </div>
                     <div class="mb-2">
-                        <label for="equipmentDescription" class="form-label">Desc:</label>
-                        <input type="text"
-                               class="form-control"
-                               id="equipmentDescription"
-                               placeholder="Equipment Description"
-                               @bind="equipment.Description"
-                        >
+                        <label class="form-label">Description:</label>
+                        <input type="text" class="form-control" @bind="modalEquipment.Description">
                     </div>
                     <div class="mb-2">
-                        <label for="rentalCost" class="form-label">Rental Cost</label>
-                        <input type="number"
-                               class="form-control"
-                               id="rentalCost"
-                               placeholder="Daily Rental Cost"
-                               @bind="equipment.DailyRentalCost"
-                        >
-
+                        <label class="form-label">Daily Rental Cost</label>
+                        <input type="number" class="form-control" @bind="modalEquipment.DailyRentalCost">
                     </div>
                     <div class="mb-2">
-                        <label for="equipmentCategory" class="form-label">Category:</label>
+                        <label class="form-label">Category:</label>
                         <select class="form-select" @bind="selectedCategoryId">
-                            <option value="">Select Category</option>
+                            <option value="0">Select Category</option>
                             @foreach (var category in categories)
                             {
                                 <option value="@category.Id">@category.Name</option>
@@ -113,24 +102,30 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @onclick="() => showEquipmentModal = false">Close</button>
-                    <button type="button" class="btn btn-primary" @onclick="AddEquipment">Add Equipment</button>
+                    <button type="button" class="btn btn-secondary" @onclick="CloseEquipmentModal">Close</button>
+                    <button type="button" class="btn btn-primary" @onclick="SaveEquipment">Save</button>
                 </div>
             </div>
         </div>
     </div>
     <div class="modal-backdrop show"></div>
-
 }
 
 @code {
     private List<Equipment> equipmentList = new();
     private List<Category> categories = new();
     private int selectedCategoryId;
-    private Equipment? equipment = new();
+    private Equipment modalEquipment = new();
     private bool showEquipmentModal = false;
     private string message = "";
+    private string modalTitle = "";
+
     protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
     {
         equipmentList = await equipmentService.GetAllEquipmentAsync();
         categories = await categoryService.GetAllCategoriesAsync();
@@ -138,57 +133,78 @@
 
     private void ShowAddEquipmentModal()
     {
+        modalEquipment = new Equipment();
+        selectedCategoryId = 0;
+        modalTitle = "Add New Equipment";
         showEquipmentModal = true;
-        equipment = new Equipment();
     }
+
+    private void ShowEditEquipmentModal(Equipment equipmentToEdit)
+    {
+        // Create a copy for editing
+        modalEquipment = new Equipment
+        {
+            Id = equipmentToEdit.Id,
+            Name = equipmentToEdit.Name,
+            Description = equipmentToEdit.Description,
+            DailyRentalCost = equipmentToEdit.DailyRentalCost,
+            IsAvailable = equipmentToEdit.IsAvailable,
+            Category = equipmentToEdit.Category
+        };
+        selectedCategoryId = equipmentToEdit.Category?.Id ?? 0;
+        modalTitle = $"Edit Equipment #{equipmentToEdit.Id}";
+        showEquipmentModal = true;
+    }
+
     private void CloseEquipmentModal()
     {
         showEquipmentModal = false;
     }
-    private async Task AddEquipment()
-    {
 
-        if(string.IsNullOrWhiteSpace(equipment.Name) || 
-           string.IsNullOrWhiteSpace(equipment.Description) || 
-           equipment.DailyRentalCost <= 0)
+    private async Task SaveEquipment()
+    {
+        if (string.IsNullOrWhiteSpace(modalEquipment.Name) || modalEquipment.DailyRentalCost <= 0)
         {
+            message = "Name and a valid daily cost are required.";
             return;
         }
-        if (selectedCategoryId > 0)
+
+        modalEquipment.Category = categories.FirstOrDefault(c => c.Id == selectedCategoryId);
+
+        bool success;
+        if (modalEquipment.Id == 0) // New Equipment
         {
-            equipment.Category = categories.FirstOrDefault(c => c.Id == selectedCategoryId);
+            success = await equipmentService.AddEquipmentAsync(modalEquipment);
+            message = success ? "Equipment added successfully." : "Failed to add equipment.";
         }
-        else
+        else // Existing Equipment
         {
-            equipment.Category = null;
+            success = await equipmentService.UpdateEquipmentAsync(modalEquipment);
+            message = success ? "Equipment updated successfully." : "Failed to update equipment.";
         }
-        var successCheck = await equipmentService.AddEquipmentAsync(equipment);
-        if (successCheck)
+
+        if (success)
         {
-            equipmentList.Add(equipment);
-            showEquipmentModal = false; 
+            await LoadData();
+            CloseEquipmentModal();
         }
     }
+
     private async Task DeleteEquipment(Equipment equipment)
     {
         message = string.Empty;
-        if (equipment.IsAvailable)
-        {
-            var successCheck = await equipmentService.DeleteEquipmentAsync(equipment.Id);
-            if (successCheck)
-            {
-                var equipmentToRemove = equipmentList.FirstOrDefault(e => e.Id == equipment.Id);
-                if (equipmentToRemove != null)
-                {
-                    equipmentList.Remove(equipmentToRemove);
-                    message = "Equipment deleted successfully.";
-                }
-            }
-        }
-        else
+        if (!equipment.IsAvailable)
         {
             message = "Error: Cannot delete equipment that is currently rented out.";
+            return;
+        }
 
+        var success = await equipmentService.DeleteEquipmentAsync(equipment.Id);
+        message = success ? "Equipment deleted successfully." : "Failed to delete equipment.";
+
+        if (success)
+        {
+            await LoadData();
         }
     }
 }
