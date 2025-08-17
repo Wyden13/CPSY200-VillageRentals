@@ -6,15 +6,16 @@
 
 main {
     flex: 1;
+    background-color: var(--main-bg);
 }
 
 .sidebar {
-    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
+    background-color: var(--sidebar-bg);
 }
 
 .top-row {
-    background-color: #f7f7f7;
-    border-bottom: 1px solid #d6d5d5;
+    background-color: var(--top-row-bg);
+    border-bottom: 1px solid #A9A9A9;
     justify-content: flex-end;
     height: 3.5rem;
     display: flex;
@@ -22,6 +23,7 @@ main {
 }
 
     .top-row ::deep a, .top-row ::deep .btn-link {
+        color: var(--sidebar-bg);
         white-space: nowrap;
         margin-left: 1.5rem;
         text-decoration: none;
