@@ -1,0 +1,155 @@
+﻿@page "/rentals"
+@using VillageRentalManagementSystem.Models
+@using VillageRentalManagementSystem.Services
+@inject EquipmentService equipmentService
+@inject CategoryService categoryService
+@inject RentalService rentalService
+
+
+
+<h3>Rentals</h3>
+@if (!string.IsNullOrWhiteSpace(message))
+{
+    <div class="alert alert-info" role="alert">
+        @message
+    </div>
+}
+
+<div class="container">
+    <div class="row mb-3">
+        <div class="col-8">
+            @* <h4>Equipment List</h4> *@
+        </div>
+        <div class="col-4">
+            <button class="btn btn-primary w-100" @onclick="ShowAddEquipmentModal">Add Equipment</button>
+        </div>
+    </div>
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Name</th>
+                <th scope="col">Description</th>
+                <th scope="col">Daily Rental Cost</th>
+                <th scope="col">Category</th>
+                <th scope="col">Availability</th>
+
+                <th scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (rentalList.Any())
+            {
+                @foreach (var equipment in rentalList)
+                {
+                    <tr>
+                        <td>@equipment.Id</td>
+                        <td>@equipment.Name</td>
+                        <td>@equipment.Description</td>
+                        <td>@equipment.DailyRentalCost.ToString("C")</td>
+                        <td>@(equipment.Category?.Name ?? "Uncategorized")</td>
+                        <td>@(equipment.IsAvailable ? "Yes" : "No")</td>
+                        <td>
+                            <button class="btn btn-danger" @onclick="() => DeleteEquipment(equipment)">Delete</button>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr><td colspan="6" class="text-center">No equipment available.</td></tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@if (showEquipmentModal)
+{
+    <div class="modal show d-block" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Equipment</h5>
+                    <button type="button" class="btn-close" @onclick=CloseEquipmentModal></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-2">
+                        <label for="equipmentName" class="form-label">Name:</label>
+                        <input type="text"
+                               class="form-control"
+                               id="equipmentName"
+                               placeholder="Equipment Name"
+                               @bind="equipment.Name">
+                    </div>
+                    <div class="mb-2">
+                        <label for="equipmentDescription" class="form-label">Desc:</label>
+                        <input type="text"
+                               class="form-control"
+                               id="equipmentDescription"
+                               placeholder="Equipment Description"
+                               @bind="equipment.Description">
+                    </div>
+                    <div class="mb-2">
+                        <label for="rentalCost" class="form-label">Rental Cost</label>
+                        <input type="number"
+                               class="form-control"
+                               id="rentalCost"
+                               placeholder="Daily Rental Cost"
+                               @bind="equipment.DailyRentalCost">
+
+                    </div>
+                    <div class="mb-2">
+                        <label for="equipmentCategory" class="form-label">Category:</label>
+                        <select class="form-select" @bind="selectedCategoryId">
+                            <option value="">Select Category</option>
+                            @foreach (var category in categories)
+                            {
+                                <option value="@category.Id">@category.Name</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="() => showEquipmentModal = false">Close</button>
+                    <button type="button" class="btn btn-primary" @onclick="AddEquipment">Add Equipment</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop show"></div>
+
+}
+
+@code {
+    private List<Rental> rentalList = new();
+    private string message = "";
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        rentalList = await rentalService.GetAllRentalAsync();
+    }
+
+    private async Task ReturnRental(int rentalId)
+    {
+        message = string.Empty;
+        try
+        {
+            bool successCheck = await rentalService.ReturnRentalAsync(rentalId);
+            if (successCheck)
+            {
+                var rentalToRemove = rentalList.FirstOrDefault(r => r.Id == rentalId);
+                if (rentalToRemove != null)
+                {
+                    rentalList.Remove(rentalToRemove);
+                    message = "Equipment Returned successfully.";
+                }
+            }
+        }
+        catch(Exception e)
+        {
+            message = $"Error: Cannot return equipment. {e.Message}";
+
+        }
+    }
+}

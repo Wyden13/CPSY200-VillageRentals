@@ -78,5 +78,59 @@ namespace VillageRentalManagementSystem.Services
                 }
             }
         }
+        public async Task<bool> ReturnRentalAsync(int rentalId)
+        {
+            var query = "UPDATE Rentals SET ActualReturnDate = @ReturnDate WHERE Id = @RentalId";
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                await connection.OpenAsync();
+                using (var command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@ReturnDate", DateTime.Today);
+                    command.Parameters.AddWithValue("@RentalId", rentalId);
+
+                    await command.ExecuteNonQueryAsync();
+                }
+            }
+
+            return false;
+        }
+
+        public async Task<List<Rental>> GetAllRentalAsync()
+        {
+            var rentalList= new List<Equipment>();
+            using (var connection = new SqlConnection(connectionString))
+            {
+                await connection.OpenAsync();
+                var query = @"
+                    SELECT r.Id, c.FirstName, c.LastName, 
+                    FROM Rentals r
+                    JOIN Customers c ON r.CustomerId = c.Id
+                    ORDER BY r.RentalDate";
+
+                using (var command = new SqlCommand(query, connection))
+                {
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            var rental = new Rental
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                customer = new Customer(0, reader.GetString(reader.GetOrdinal("CategoryName"))),
+                                Name = reader.GetString(reader.GetOrdinal("Name")),
+                                Description = reader.GetString(reader.GetOrdinal("Description")),
+                                DailyRentalCost = (double)reader.GetDecimal(reader.GetOrdinal("DailyRentalCost")),
+                                IsAvailable = reader.GetBoolean(reader.GetOrdinal("IsAvailable"))
+                                //create a new Category object for the equipment
+                            };
+                            rentalList.Add(rental);
+                        }
+                    }
+                }
+            }
+            return equipmentList;
+        }
     }
 }

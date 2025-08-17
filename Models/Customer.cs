@@ -33,6 +33,13 @@ namespace VillageRentalManagementSystem.Models
             DiscountRate = discountRate;
         }
 
+        public Customer(int id, string firstName, string lastname)
+        {
+            this.Id = id;
+            this.FirstName = firstName;
+            this.LastName = lastname;
+        }
+
         public Customer()
         {
         }

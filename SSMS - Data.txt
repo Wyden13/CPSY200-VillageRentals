@@ -4,6 +4,7 @@ GO
 -- =================================================================
 -- STEP 1: Clean and Reset the Database
 -- =================================================================
+PRINT 'STEP 1: Cleaning all tables...';
 DELETE FROM RentalItems;
 DELETE FROM Rentals;
 DELETE FROM Equipment;
@@ -11,6 +12,7 @@ DELETE FROM Categories;
 DELETE FROM Customers;
 GO
 
+PRINT 'STEP 2: Resetting ID counters...';
 DBCC CHECKIDENT ('Categories', RESEED, 0);
 DBCC CHECKIDENT ('Customers', RESEED, 0);
 DBCC CHECKIDENT ('Equipment', RESEED, 0);
@@ -19,8 +21,9 @@ DBCC CHECKIDENT ('RentalItems', RESEED, 0);
 GO
 
 -- =================================================================
--- STEP 2: Insert Initial Data
+-- STEP 2: Insert Base Data (Customers, Categories, Equipment)
 -- =================================================================
+PRINT 'STEP 3: Inserting base data...';
 
 -- Insert Categories
 INSERT INTO Categories (Name) VALUES
@@ -29,67 +32,130 @@ INSERT INTO Categories (Name) VALUES
 ('Kitchen Appliances'), ('Audio/Visual Equipment');
 GO
 
--- Insert Customers
+-- Insert Customers (Expanded to 20)
 INSERT INTO Customers (FirstName, LastName, PhoneNumber, Email, IsBanned, DiscountRate) VALUES
-('John','Smith','555-1001','john.smith1@example.com',0,0.00),
-('Jane','Johnson','555-1002','jane.johnson2@example.com',0,2.50),
-('Michael','Brown','555-1003','michael.brown3@example.com',0,5.00),
-('Emily','Taylor','555-1004','emily.taylor4@example.com',0,0.00),
-('David','Anderson','555-1005','david.anderson5@example.com',0,7.50),
-('Sarah','Thomas','555-1006','sarah.thomas6@example.com',1,0.00),
-('Daniel','Jackson','555-1007','daniel.jackson7@example.com',0,0.00),
-('Laura','White','555-1008','laura.white8@example.com',0,10.00),
-('James','Harris','555-1009','james.harris9@example.com',0,0.00),
-('Olivia','Martin','555-1010','olivia.martin10@example.com',0,0.00);
+('John','Smith','555-1001','john.smith1@example.com',0,0.00), ('Jane','Johnson','555-1002','jane.johnson2@example.com',0,2.50),
+('Michael','Brown','555-1003','michael.brown3@example.com',0,5.00), ('Emily','Taylor','555-1004','emily.taylor4@example.com',0,0.00),
+('David','Anderson','555-1005','david.anderson5@example.com',0,7.50), ('Sarah','Thomas','555-1006','sarah.thomas6@example.com',1,0.00),
+('Daniel','Jackson','555-1007','daniel.jackson7@example.com',0,0.00), ('Laura','White','555-1008','laura.white8@example.com',0,10.00),
+('James','Harris','555-1009','james.harris9@example.com',0,0.00), ('Olivia','Martin','555-1010','olivia.martin10@example.com',0,0.00),
+('Chris','Lee','555-1011','chris.lee@example.com',0,0.00), ('Patricia','Hall','555-1012','patricia.hall@example.com',0,5.00),
+('Robert','Allen','555-1013','robert.allen@example.com',0,0.00), ('Linda','Young','555-1014','linda.young@example.com',0,0.00),
+('William','King','555-1015','william.king@example.com',0,2.50), ('Barbara','Wright','555-1016','barbara.wright@example.com',0,0.00),
+('Richard','Scott','555-1017','richard.scott@example.com',0,0.00), ('Susan','Green','555-1018','susan.green@example.com',0,0.00),
+('Joseph','Adams','555-1019','joseph.adams@example.com',0,7.50), ('Jessica','Baker','555-1020','jessica.baker@example.com',0,0.00);
 GO
 
--- Insert Equipment
+-- Insert Equipment (Expanded for more availability)
 INSERT INTO Equipment (Name, Description, DailyRentalCost, IsAvailable, CategoryId) VALUES
 ('Electric Drill','Cordless drill',15.00,1,1), ('Circular Saw','7-inch blade',18.00,1,1),
+('Air Compressor','5 Gallon, 150 PSI',22.00,1,1), ('Paint Sprayer','Airless paint sprayer',30.00,1,1),
 ('Lawn Mower','Gas-powered',20.00,1,2), ('Leaf Blower','Cordless blower',10.00,1,2),
+('Hedge Trimmer','22-inch electric trimmer',12.00,1,2), ('Chainsaw','16-inch gas powered',25.00,1,2),
 ('Tent','4-person waterproof',25.00,1,3), ('Sleeping Bag','Warm sleeping bag',8.00,1,3),
+('Camping Stove','2-burner propane stove',15.00,1,3), ('Generator','2000W portable generator',40.00,1,3),
 ('Cement Mixer','Electric, 2 cubic feet',30.00,1,4), ('Jackhammer','Electric',35.00,1,4),
+('Ladder','24-foot extension ladder',18.00,1,4), ('Scaffolding','5-foot section',25.00,1,4),
 ('Folding Table','6-foot folding table',8.00,1,5), ('Sound System','PA system',40.00,1,5),
-('Projector','HD projector',35.00,1,6), ('Laptop','15-inch, Intel i5',50.00,1,6);
-GO
-
--- Insert Rentals (with TotalCost initialized to 0)
-INSERT INTO Rentals (CustomerId, RentalDate, ExpectedReturnDate, TotalCost) VALUES
-(1, GETDATE(), DATEADD(DAY,2,GETDATE()), 0.00), (2, GETDATE(), DATEADD(DAY,3,GETDATE()), 0.00),
-(3, GETDATE(), DATEADD(DAY,1,GETDATE()), 0.00), (4, GETDATE(), DATEADD(DAY,4,GETDATE()), 0.00),
-(5, GETDATE(), DATEADD(DAY,2,GETDATE()), 0.00), (6, GETDATE(), DATEADD(DAY,1,GETDATE()), 0.00),
-(7, GETDATE(), DATEADD(DAY,5,GETDATE()), 0.00), (8, GETDATE(), DATEADD(DAY,3,GETDATE()), 0.00),
-(9, GETDATE(), DATEADD(DAY,2,GETDATE()), 0.00), (10, GETDATE(), DATEADD(DAY,1,GETDATE()), 0.00);
+('Popcorn Machine','Commercial popcorn popper',20.00,1,5), ('Karaoke Machine','System with 2 mics',30.00,1,5),
+('Projector','HD projector',35.00,1,6), ('Laptop','15-inch, Intel i5',50.00,1,6),
+('Mountain Bike','21-speed',20.00,1,7), ('Kayak','Single-person',25.00,1,7),
+('Vacuum Cleaner','Commercial-grade',15.00,1,8), ('Pressure Washer','Gas-powered',25.00,1,8),
+('Carpet Cleaner','Steam cleaner for carpets',30.00,1,8),
+('Blender','High-speed kitchen',8.00,1,9), ('Microwave Oven','700W microwave',10.00,1,9),
+('Microphone','Dynamic microphone',5.00,1,10), ('Speaker','Bluetooth portable',12.00,1,10);
 GO
 
 -- =================================================================
--- STEP 3: Insert Rental Items with Multiple Items per Rental
+-- STEP 3: Insert New Multi-Day Rental Data (At least 5 per day)
 -- =================================================================
+PRINT 'STEP 4: Inserting new rental data from Aug 15 to Aug 25...';
+
+-- Insert Rentals
+INSERT INTO Rentals (CustomerId, RentalDate, ExpectedReturnDate, ActualReturnDate, TotalCost) VALUES
+-- August 15 (5 rentals)
+(1, '2025-08-15 09:15:00', '2025-08-17', NULL, 0.00), (2, '2025-08-15 11:30:00', '2025-08-16', NULL, 0.00),
+(11, '2025-08-15 12:00:00', '2025-08-16', NULL, 0.00), (12, '2025-08-15 14:20:00', '2025-08-17', NULL, 0.00),
+(13, '2025-08-15 16:00:00', '2025-08-18', NULL, 0.00),
+-- August 16 (5 rentals)
+(3, '2025-08-16 14:00:00', '2025-08-18', NULL, 0.00), (14, '2025-08-16 09:00:00', '2025-08-17', NULL, 0.00),
+(15, '2025-08-16 10:30:00', '2025-08-19', NULL, 0.00), (16, '2025-08-16 11:00:00', '2025-08-18', NULL, 0.00),
+(17, '2025-08-16 15:00:00', '2025-08-17', NULL, 0.00),
+-- August 17 (5 rentals)
+(18, '2025-08-17 10:00:00', '2025-08-19', NULL, 0.00), (19, '2025-08-17 11:00:00', '2025-08-20', NULL, 0.00),
+(20, '2025-08-17 13:45:00', '2025-08-18', NULL, 0.00), (1, '2025-08-17 14:00:00', '2025-08-19', NULL, 0.00),
+(2, '2025-08-17 16:30:00', '2025-08-20', NULL, 0.00),
+-- August 18 (5 rentals)
+(4, '2025-08-18 10:00:00', '2025-08-20', NULL, 0.00), (5, '2025-08-18 16:45:00', '2025-08-21', NULL, 0.00),
+(3, '2025-08-18 09:30:00', '2025-08-19', NULL, 0.00), (6, '2025-08-18 11:00:00', '2025-08-21', NULL, 0.00),
+(7, '2025-08-18 14:00:00', '2025-08-20', NULL, 0.00),
+-- August 19 (5 rentals)
+(8, '2025-08-19 10:15:00', '2025-08-21', NULL, 0.00), (9, '2025-08-19 12:00:00', '2025-08-22', NULL, 0.00),
+(10, '2025-08-19 13:00:00', '2025-08-20', NULL, 0.00), (11, '2025-08-19 15:30:00', '2025-08-22', NULL, 0.00),
+(12, '2025-08-19 17:00:00', '2025-08-21', NULL, 0.00),
+-- August 20 (5 rentals)
+(1, '2025-08-20 13:00:00', '2025-08-22', NULL, 0.00), (13, '2025-08-20 09:00:00', '2025-08-21', NULL, 0.00),
+(14, '2025-08-20 10:00:00', '2025-08-23', NULL, 0.00), (15, '2025-08-20 14:30:00', '2025-08-22', NULL, 0.00),
+(16, '2025-08-20 16:00:00', '2025-08-21', NULL, 0.00),
+-- August 21 (5 rentals)
+(17, '2025-08-21 11:00:00', '2025-08-23', NULL, 0.00), (18, '2025-08-21 12:30:00', '2025-08-24', NULL, 0.00),
+(19, '2025-08-21 14:00:00', '2025-08-22', NULL, 0.00), (20, '2025-08-21 15:00:00', '2025-08-23', NULL, 0.00),
+(1, '2025-08-21 17:00:00', '2025-08-24', NULL, 0.00),
+-- August 22 (5 rentals)
+(7, '2025-08-22 08:30:00', '2025-08-25', NULL, 0.00), (8, '2025-08-22 17:00:00', '2025-08-24', NULL, 0.00),
+(2, '2025-08-22 10:00:00', '2025-08-23', NULL, 0.00), (3, '2025-08-22 11:30:00', '2025-08-25', NULL, 0.00),
+(4, '2025-08-22 14:00:00', '2025-08-24', NULL, 0.00),
+-- August 23 (5 rentals)
+(5, '2025-08-23 09:00:00', '2025-08-25', NULL, 0.00), (6, '2025-08-23 10:30:00', '2025-08-26', NULL, 0.00),
+(9, '2025-08-23 12:00:00', '2025-08-24', NULL, 0.00), (10, '2025-08-23 13:30:00', '2025-08-25', NULL, 0.00),
+(11, '2025-08-23 15:00:00', '2025-08-26', NULL, 0.00),
+-- August 24 (5 rentals)
+(12, '2025-08-24 10:00:00', '2025-08-26', NULL, 0.00), (13, '2025-08-24 11:00:00', '2025-08-27', NULL, 0.00),
+(14, '2025-08-24 13:00:00', '2025-08-25', NULL, 0.00), (15, '2025-08-24 14:30:00', '2025-08-26', NULL, 0.00),
+(16, '2025-08-24 16:00:00', '2025-08-27', NULL, 0.00),
+-- August 25 (5 rentals)
+(9, '2025-08-25 12:00:00', '2025-08-26', NULL, 0.00), (10, '2025-08-25 15:30:00', '2025-08-28', NULL, 0.00),
+(17, '2025-08-25 09:30:00', '2025-08-26', NULL, 0.00), (18, '2025-08-25 11:00:00', '2025-08-28', NULL, 0.00),
+(19, '2025-08-25 14:00:00', '2025-08-27', NULL, 0.00);
+GO
+
+-- Insert Rental Items
 INSERT INTO RentalItems (RentalId, EquipmentId, RentalCost) VALUES
--- Rental 1: John Smith's Party (3 items)
-(1, 10, 40.00), -- Sound System
-(1, 9, 8.00),   -- Folding Table
-(1, 11, 35.00), -- Projector
-
--- Rental 2: Jane Johnson's Construction Job (3 items)
-(2, 1, 15.00),  -- Electric Drill
-(2, 2, 18.00),  -- Circular Saw
-(2, 8, 35.00),  -- Jackhammer
-
--- Rental 3: Michael Brown's Yard Work (1 item)
-(3, 3, 20.00),  -- Lawn Mower
-
--- Rental 4: Emily Taylor's Presentation (1 item)
-(4, 12, 50.00), -- Laptop
-
--- Rental 5: David Anderson's Camping Trip (2 items)
-(5, 5, 25.00),  -- Tent
-(5, 6, 8.00);   -- Sleeping Bag
+-- Aug 15
+(1, 18, 40.00), (1, 17, 8.00), (1, 21, 35.00), (2, 13, 30.00), (2, 14, 35.00), (3, 23, 20.00), (4, 29, 8.00), (4, 30, 10.00), (5, 7, 12.00),
+-- Aug 16
+(6, 5, 20.00), (6, 6, 10.00), (6, 26, 25.00), (7, 9, 25.00), (7, 10, 8.00), (8, 1, 15.00), (9, 20, 30.00), (10, 22, 50.00),
+-- Aug 17
+(11, 24, 25.00), (12, 27, 30.00), (13, 3, 22.00), (14, 8, 25.00), (15, 11, 15.00), (15, 12, 40.00),
+-- Aug 18
+(16, 9, 25.00), (16, 10, 8.00), (17, 22, 50.00), (17, 31, 12.00), (18, 4, 30.00), (19, 19, 20.00), (20, 15, 18.00),
+-- Aug 19
+(21, 16, 25.00), (22, 25, 20.00), (23, 28, 8.00), (24, 31, 5.00), (24, 21, 35.00), (25, 5, 20.00),
+-- Aug 20
+(26, 1, 15.00), (26, 2, 18.00), (27, 26, 25.00), (28, 17, 8.00), (28, 19, 20.00), (29, 11, 15.00), (30, 7, 12.00),
+-- Aug 21
+(31, 8, 25.00), (32, 13, 30.00), (32, 14, 35.00), (33, 23, 20.00), (33, 24, 25.00), (34, 29, 8.00), (35, 18, 40.00), (35, 20, 30.00),
+-- Aug 22
+(36, 23, 20.00), (36, 24, 25.00), (37, 29, 8.00), (37, 30, 10.00), (38, 3, 22.00), (39, 5, 20.00), (39, 6, 10.00), (40, 9, 25.00),
+-- Aug 23
+(41, 12, 40.00), (42, 15, 18.00), (42, 16, 25.00), (43, 19, 20.00), (44, 22, 50.00), (45, 27, 30.00),
+-- Aug 24
+(46, 1, 15.00), (47, 4, 30.00), (47, 3, 22.00), (48, 7, 12.00), (49, 9, 25.00), (49, 10, 8.00), (49, 11, 15.00), (50, 17, 8.00),
+-- Aug 25
+(51, 15, 18.00), (51, 16, 25.00), (52, 21, 35.00), (52, 31, 5.00), (52, 31, 12.00), (53, 25, 20.00), (54, 28, 8.00), (55, 5, 20.00);
 GO
 
 -- =================================================================
 -- STEP 4: Apply Business Logic
 -- =================================================================
+PRINT 'STEP 5: Applying business logic...';
+
+-- First, simulate some returns to test the availability logic
+PRINT 'Simulating some returns...';
+UPDATE Rentals SET ActualReturnDate = '2025-08-17 10:00:00' WHERE Id IN (1, 2, 3);
+UPDATE Rentals SET ActualReturnDate = '2025-08-18 11:00:00' WHERE Id IN (6, 7);
+UPDATE Rentals SET ActualReturnDate = '2025-08-20 09:00:00' WHERE Id IN (11, 13, 14);
+GO
 
 -- Calculate the total cost for each rental by summing its items.
 PRINT 'Updating rental total costs...';
@@ -102,12 +168,17 @@ SET r.TotalCost = (
 FROM Rentals r;
 GO
 
--- Mark rented equipment as unavailable.
+-- **IMPROVED LOGIC**: Mark equipment as unavailable only if it's on a rental
+-- that has NOT been returned yet.
 PRINT 'Updating equipment availability status...';
 UPDATE Equipment
 SET IsAvailable = 0
 WHERE Id IN (
-    SELECT DISTINCT EquipmentId FROM RentalItems
+    SELECT DISTINCT ri.EquipmentId 
+    FROM RentalItems ri
+    JOIN Rentals r
+        ON ri.RentalId = r.id
+    WHERE r.ActualReturnDate IS NULL
 );
 GO
 
@@ -115,14 +186,16 @@ GO
 -- STEP 5: Verify the Results
 -- =================================================================
 PRINT 'Final Rental Data with Calculated Totals:';
-SELECT 
+SELECT
     r.Id AS RentalId,
+    CAST(r.RentalDate AS DATE) as SaleDate,
     c.FirstName + ' ' + c.LastName AS Customer,
-    r.TotalCost
+    r.TotalCost,
+    r.ActualReturnDate
 FROM Rentals r
 JOIN Customers c ON r.CustomerId = c.Id
-ORDER BY r.Id;
+ORDER BY r.RentalDate;
 
 PRINT 'Final Equipment Data with Availability Status:';
-SELECT Id, Name, IsAvailable FROM Equipment;
+SELECT Id, Name, IsAvailable FROM Equipment ORDER BY Id;
 GO
