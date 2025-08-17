@@ -122,7 +122,7 @@ namespace VillageRentalManagementSystem.Services
                     SELECT r.Id AS RentalId, r.RentalDate, r.ExpectedReturnDate, r.TotalCost, r.CustomerId AS CustomerId, c.FirstName, c.LastName, c.Email
                     FROM Rentals r
                     JOIN Customers c ON r.CustomerId = c.Id
-                    WHERE r.ActualReturnDate IS NOT NULL
+                    WHERE r.ActualReturnDate IS NULL
                     ORDER BY r.ExpectedReturnDate";
 
                 using (var command = new SqlCommand(query, connection))
