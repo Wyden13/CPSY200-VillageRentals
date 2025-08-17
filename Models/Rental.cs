@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.IdentityModel.Tokens;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -25,8 +26,16 @@ namespace VillageRentalManagementSystem.Models
             this.items = items;
         }
 
+        public Rental(int id, Customer customer)
+        {
+            Id = id;
+            this.customer = customer;
+        }
+
         public double CalculateTotalCost()
         {
+            if (items.IsNullOrEmpty()) return 0;
+
             double totalCost = 0;
             foreach (RentalItem item in items)
             {

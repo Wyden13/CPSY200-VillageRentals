@@ -104,9 +104,10 @@ namespace VillageRentalManagementSystem.Services
             {
                 await connection.OpenAsync();
                 var query = @"
-                    SELECT r.Id, c.FirstName, c.LastName, 
+                    SELECT r.Id AS RentalId, r.CustomerId, r.RentalDate, r.ExpectedReturnDate  c.FirstName, c.LastName, 
                     FROM Rentals r
                     JOIN Customers c ON r.CustomerId = c.Id
+                    WHERE r.ActualReturnDate
                     ORDER BY r.RentalDate";
 
                 using (var command = new SqlCommand(query, connection))
