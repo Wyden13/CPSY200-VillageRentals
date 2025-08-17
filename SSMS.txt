@@ -1,14 +1,6 @@
 ﻿-- =================================================================
 -- SQL Script for Village Rental Management System
 -- =================================================================
--- Instructions:
--- 1. Create a new database in SQL Server. Name it "VillageRentalDB"
--- 2. Create a new query window for that database.
--- 3. Copy and paste this entire script into the query window.
--- 4. Execute the script.
--- 5. Follow the final steps at the end of the script to enable
---    the auto-incrementing ID columns in the table designer.
--- =================================================================
 
 -- Step 1: Drop existing tables to start fresh
 PRINT 'Dropping existing tables...';
@@ -22,50 +14,47 @@ GO
 -- Step 2: Create the main tables
 PRINT 'Creating tables...';
 
--- Table for storing customer information
 CREATE TABLE Customers (
-    Id INT PRIMARY KEY IDENTITY(1,1), -- Auto-incrementing primary key
+    Id INT PRIMARY KEY IDENTITY(1,1),
     FirstName NVARCHAR(50) NOT NULL,
     LastName NVARCHAR(50) NOT NULL,
     PhoneNumber NVARCHAR(20),
-    Email NVARCHAR(100) UNIQUE, -- Emails should be unique
-    IsBanned BIT NOT NULL DEFAULT 0, -- Default to not banned
-    DiscountRate DECIMAL(5, 2) NOT NULL DEFAULT 0.00 -- e.g., 0.10 for 10%
+    Email NVARCHAR(100) UNIQUE,
+    IsBanned BIT NOT NULL DEFAULT 0,
+    DiscountRate DECIMAL(5, 2) NOT NULL DEFAULT 0.00
 );
 
--- Table for equipment categories (e.g., "Power Tools", "Gardening")
 CREATE TABLE Categories (
     Id INT PRIMARY KEY IDENTITY(1,1),
     Name NVARCHAR(50) NOT NULL UNIQUE
 );
 
--- Table for individual rental equipment
 CREATE TABLE Equipment (
     Id INT PRIMARY KEY IDENTITY(1,1),
     Name NVARCHAR(100) NOT NULL,
     Description NVARCHAR(500),
     DailyRentalCost DECIMAL(10, 2) NOT NULL,
-    IsAvailable BIT NOT NULL DEFAULT 1, -- Default to available
-    CategoryId INT, -- Foreign key to the Categories table
+    IsAvailable BIT NOT NULL DEFAULT 1,
+    CategoryId INT
 );
 
--- Table for rental transactions
 CREATE TABLE Rentals (
     Id INT PRIMARY KEY IDENTITY(1,1),
-    CustomerId INT NOT NULL, -- Foreign key to the Customers table
-    RentalDate DATETIME NOT NULL DEFAULT GETDATE(), -- The date the rental was created
+    CustomerId INT NOT NULL,
+    RentalDate DATETIME NOT NULL DEFAULT GETDATE(),
     ExpectedReturnDate DATETIME,
-    ActualReturnDate DATETIME NULL, -- Null until the items are returned
     TotalCost DECIMAL(10, 2)
 );
 
--- This is a "linking table" for the many-to-many relationship
--- between Rentals and Equipment. One rental can have many items.
+-- CORRECTED RentalItems table
 CREATE TABLE RentalItems (
     Id INT PRIMARY KEY IDENTITY(1,1),
-    RentalId INT NOT NULL, -- Foreign key to the Rentals table
-    EquipmentId INT NOT NULL, -- Foreign key to the Equipment table
-    RentalCost DECIMAL(10, 2) NOT NULL -- The cost for this specific item at the time of rental
+    RentalId INT NOT NULL,
+    EquipmentId INT NOT NULL,
+    RentalCost DECIMAL(10, 2) NOT NULL,
+    ExpectedReturnDate DATETIME NOT NULL, -- <<< THIS COLUMN IS NOW ADDED
+    IsReturned BIT NOT NULL DEFAULT 0,
+    ActualReturnDate DATETIME NULL
 );
 GO
 
@@ -90,14 +79,4 @@ FOREIGN KEY (EquipmentId) REFERENCES Equipment(Id);
 GO
 
 PRINT 'Script execution completed successfully.';
-PRINT '=================================================================';
-PRINT 'FINAL MANUAL STEPS (If you prefer the designer):';
-PRINT 'If you did not use IDENTITY(1,1) above, you must do this manually.';
-PRINT '1. In SSMS Object Explorer, right-click on a table and choose "Design".';
-PRINT '2. Select the "Id" column.';
-PRINT '3. In "Column Properties", find "Identity Specification".';
-PRINT '4. Set "(Is Identity)" to "Yes".';
-PRINT '5. Save the table. Repeat for all tables with an "Id" column.';
-PRINT '=================================================================';
 GO
-

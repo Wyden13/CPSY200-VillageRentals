@@ -1,149 +1,161 @@
 ﻿@page "/rentals"
 @using VillageRentalManagementSystem.Models
 @using VillageRentalManagementSystem.Services
-@inject EquipmentService equipmentService
-@inject CategoryService categoryService
 @inject RentalService rentalService
-
-
+@inject RentalItemService rentalItemService
 
 <h3>Manage Rentals</h3>
 
-<div class="container">
-    @* <div class="row mb-3">
-        <div class="col-8">
-             <h4>Equipment List</h4> 
-        </div>
-        <div class="col-4">
-            <button class="btn btn-primary w-100" @onclick="ShowAddEquipmentModal">Return Equipment</button>
-        </div> 
-    </div> *@
-    <table class="table table-hover">
-        <thead>
-            <tr>
-                <th scope="col">Rental ID</th>
-                <th scope="col">Customer Name</th>
-                <th scope="col">Customer Email</th>
-                <th scope="col">Total Cost</th>
-                <th scope="col">Rental Date</th>
-                <th scope="col">Expected Date</th>
-                <th scope="col"></th>
-            </tr>
-        </thead>
-        <tbody>
-            @if (rentalList.Any())
-            {
-                @foreach (Rental rental in rentalList)
-                {
-                    <tr>
-                        <td>@rental.Id</td>
-                        <td>@rental.customer.FirstName @rental.customer.LastName </td>
-                        <td>@rental.customer.Email</td>
-                        <td>@rental.TotalCost.ToString("C")</td>
-                        <td>@rental.RentalDate.ToShortDateString()</td>
-                        <td>@rental.ExpectedReturnDate.ToShortDateString()</td>
-                        <td>
-                            <button class="btn btn-secondary" @onclick="() => ReturnRental(rental.Id)">Process Return</button>
-                        </td>
-                    </tr>
-                }
-            }
-            else
-            {
-                <tr><td colspan="6" class="text-center">No rental available.</td></tr>
-            }
-        </tbody>
-    </table>
-</div>
+@if (!string.IsNullOrEmpty(message))
+{
+    <div class="alert alert-success">@message</div>
+}
 
-@* @if (showEquipmentModal)
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th>Rental ID</th>
+            <th>Customer Name</th>
+            <th>Total Cost</th>
+            <th>Rental Date</th>
+            <th>Expected Return</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (rentalList.Any())
+        {
+            @foreach (var rental in rentalList)
+            {
+                <tr>
+                    <td>@rental.Id</td>
+                    <td>@rental.customer.FirstName @rental.customer.LastName</td>
+                    <td>@rental.TotalCost.ToString("C")</td>
+                    <td>@rental.RentalDate.ToShortDateString()</td>
+                    <td>@rental.ExpectedReturnDate.ToShortDateString()</td>
+                    <td>
+                        <button class="btn btn-secondary" @onclick="() => OpenReturnModal(rental.Id)">Process Return</button>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr><td colspan="6" class="text-center">No active rentals found.</td></tr>
+        }
+    </tbody>
+</table>
+
+<!-- Return Items Modal -->
+@if (showReturnModal)
 {
     <div class="modal show d-block" tabindex="-1">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Add Equipment</h5>
-                    <button type="button" class="btn-close" @onclick=CloseEquipmentModal></button>
+                    <h5 class="modal-title">Return Items for Rental #@selectedRentalId</h5>
+                    <button type="button" class="btn-close" @onclick="CloseReturnModal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-2">
-                        <label for="equipmentName" class="form-label">Name:</label>
-                        <input type="text"
-                               class="form-control"
-                               id="equipmentName"
-                               placeholder="Equipment Name"
-                               @bind="equipment.Name">
-                    </div>
-                    <div class="mb-2">
-                        <label for="equipmentDescription" class="form-label">Desc:</label>
-                        <input type="text"
-                               class="form-control"
-                               id="equipmentDescription"
-                               placeholder="Equipment Description"
-                               @bind="equipment.Description">
-                    </div>
-                    <div class="mb-2">
-                        <label for="rentalCost" class="form-label">Rental Cost</label>
-                        <input type="number"
-                               class="form-control"
-                               id="rentalCost"
-                               placeholder="Daily Rental Cost"
-                               @bind="equipment.DailyRentalCost">
-
-                    </div>
-                    <div class="mb-2">
-                        <label for="equipmentCategory" class="form-label">Category:</label>
-                        <select class="form-select" @bind="selectedCategoryId">
-                            <option value="">Select Category</option>
-                            @foreach (var category in categories)
-                            {
-                                <option value="@category.Id">@category.Name</option>
-                            }
-                        </select>
-                    </div>
+                    @if (itemsToReturn.Any())
+                    {
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Equipment Name</th>
+                                    <th>Status</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in itemsToReturn)
+                                {
+                                    <tr>
+                                        <td>@item.equipment.Name</td>
+                                        <td>
+                                            @if (item.IsReturned)
+                                            {
+                                                <span class="badge bg-success">Returned on @item.ActualReturnDate?.ToShortDateString()</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-warning text-dark">Out</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-primary btn-sm" disabled="@item.IsReturned" @onclick="() => ReturnItem(item.Id, item.equipment.Id)">
+                                                Return Item
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p>Loading items...</p>
+                    }
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @onclick="() => showEquipmentModal = false">Close</button>
-                    <button type="button" class="btn btn-primary" @onclick="AddEquipment">Add Equipment</button>
+                    <button type="button" class="btn btn-secondary" @onclick="CloseReturnModal">Close</button>
                 </div>
             </div>
         </div>
     </div>
     <div class="modal-backdrop show"></div>
+}
 
-} *@
 
 @code {
     private List<Rental> rentalList = new();
+    private List<RentalItem> itemsToReturn = new();
+    private bool showReturnModal = false;
+    private int selectedRentalId;
     private string message = "";
 
-
     protected override async Task OnInitializedAsync()
+    {
+        await LoadRentals();
+    }
+
+    private async Task LoadRentals()
     {
         rentalList = await rentalService.GetAllRentalAsync();
     }
 
-    private async Task ReturnRental(int rentalId)
+    private async Task OpenReturnModal(int rentalId)
     {
-        message = string.Empty;
-        try
-        {
-            bool successCheck = await rentalService.ReturnRentalAsync(rentalId);
-            if (successCheck)
-            {
-                var rentalToRemove = rentalList.FirstOrDefault(r => r.Id == rentalId);
-                if (rentalToRemove != null)
-                {
-                    rentalList.Remove(rentalToRemove);
-                    message = "Equipment Returned successfully.";
-                }
-            }
-            await App.Current.MainPage.DisplayAlert("Success!", message, "Ok");
-        }
-        catch(Exception e)
-        {
-            message = $"Error: Cannot return equipment. {e.Message}";
+        selectedRentalId = rentalId;
+        itemsToReturn = await rentalItemService.GetRentalItemsAsync(rentalId);
+        showReturnModal = true;
+    }
 
+    private void CloseReturnModal()
+    {
+        showReturnModal = false;
+        itemsToReturn.Clear();
+    }
+
+    private async Task ReturnItem(int rentalItemId, int equipmentId)
+    {
+        bool success = await rentalItemService.ReturnRentalItemAsync(rentalItemId, equipmentId);
+        if (success)
+        {
+            // Refresh the list of items in the modal to show the change
+            itemsToReturn = await rentalItemService.GetRentalItemsAsync(selectedRentalId);
+            message = "Item returned successfully!";
+
+            // If all items for this rental have been returned, refresh the main rental list
+            if (itemsToReturn.All(item => item.IsReturned))
+            {
+                CloseReturnModal();
+                await LoadRentals(); // This will remove the fully returned rental from the page
+            }
+        }
+        else
+        {
+            message = "Error returning item.";
         }
     }
 }

@@ -1,183 +1,139 @@
 ﻿@page "/reports-page"
 @using VillageRentalManagementSystem.Services
-@using VillageRentalManagementSystem.Models
 @using VillageRentalManagementSystem.Models.Reports
-@inject CustomerService customerService
-@inject EquipmentService equipmentService
-@inject CategoryService categoryService
-@inject RentalService rentalService
-@inject NavigationManager navigationManager
 @inject ReportService reportService
 
-<h3>Generate Reporst</h3>
+<h3 class="mb-4">Generate Reports</h3>
 
-<div class="">
-    <div class="btn-group">
-
-        <button type="button" class="btn-outline-secondary" @onclick="SalesByDateSelected"> Sales by Date</button>
-
-        <button type="button" class="btn-outline-secondary" @onclick="SalesByCustomerSelected"> Sales by Customer</button>
-
-        <button type="button" class="btn-outline-secondary" @onclick="ListByCategorySelected"> List items by Category</button>
-
-    </div>
-    <div class="">
-        @if(isSalesByDate) {
-            <div class="md-3">
-                <label class="form-label">Date:</label>
-                <input type="datetime-local" @bind="selectedDate" class="form-control" />             
-            </div>
-            <div>
-                <button @onclick="SelectDate">Generate</button>
-            </div>
-        }
-    </div>
-
-    <div>
-        <div>
-            @if (isSalesByDate && dailySales != null)
-            {
-            <table>
-                <thead>
-                    <tr>
-                        <td>Rental Id: </td>
-                        <td>Customer First Name: </td>
-                        <td>Customer Last Name: </td>
-                        <td>Number of Items: </td>
-                        <td>Total Sale: </td>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (DailySalesReportItem item in dailySales)
-                    {
-                        <tr>
-                            <td>@item.RentalId</td>
-                            <td>@item.CustFirstName</td>
-                            <td>@item.CustLastName</td>
-                            <td>@item.NumberOfItems</td>
-                            <td>@item.TotalSales</td>
-                        </tr>        
-                    }
-                    <div> Total Sale for @selectedDate.ToShortDateString() is = $@TotalSalesOfDate</div>
-                </tbody>
-            </table>
-            }<!-- end sales by date -->
-            @if (isSalesByCustomer)
-            {
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <td class="col">Customer Id </td>
-                        <td class="col">Customer Name </td>
-                        <td class="col">Total Amount Spent </td>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (CustomerSalesReportItem item in customerSales)
-                    {
-                        <tr>
-                            <td>@item.CustomerId</td>
-                            <td>@item.CustomerName</td>
-                            <td>@item.TotalAmountSpent</td>
-                        </tr>        
-                    }
-                </tbody>
-            </table>
-            }
-            @if (isListByCategory)
-            {
-            <table>
-                <thead>
-                    <tr>
-                            <td class="col">Category Id </td>
-                            <td class="col">Category Name </td>
-                            <td class="col">Total Sales </td>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (CategorySalesReportItem item in categorySales)
-                    {
-                        <tr>
-                            <td>@item.CategoryId</td>
-                            <td>@item.CategoryName</td>
-                            <td>@item.TotalSales</td>
-                        </tr>        
-                    }
-                </tbody>
-            </table>
-            }
+<div class="card">
+    <div class="card-header">
+        <div class="btn-group w-100" role="group">
+            <button type="button" class="btn @(selectedReport == "Date" ? "btn-primary" : "btn-outline-primary")" @onclick='() => SelectReport(" Date")'>Sales by Date</button>
+            <button type="button" class="btn @(selectedReport == "Customer" ? "btn-primary" : "btn-outline-primary")" @onclick='() => SelectReport(" Customer")'>Sales by Customer</button>
+            <button type="button" class="btn @(selectedReport == "Category" ? "btn-primary" : "btn-outline-primary")" @onclick='() => SelectReport(" Category")'>Sales by Category</button>
         </div>
+    </div>
+    <div class="card-body">
+        @switch (selectedReport)
+        {
+            case "Date":
+                <div class="row g-3 align-items-end mb-4">
+                    <div class="col-md-4">
+                        <label class="form-label">Select Date:</label>
+                        <input type="date" @bind="selectedDate" class="form-control" />
+                    </div>
+                    <div class="col-md-4">
+                        <button class="btn btn-success w-100" @onclick="GenerateDailyReport">Generate</button>
+                    </div>
+                </div>
+                @if (dailySales != null)
+                {
+                    <h4 class="mt-4">Report for @selectedDate.ToShortDateString()</h4>
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Rental ID</th>
+                                <th>Customer Name</th>
+                                <th class="text-center"># of Items</th>
+                                <th class="text-end">Total Sale</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in dailySales)
+                            {
+                                <tr>
+                                    <td>@item.RentalId</td>
+                                    <td>@item.CustFirstName @item.CustLastName</td>
+                                    <td class="text-center">@item.NumberOfItems</td>
+                                    <td class="text-end">@item.TotalSales.ToString("C")</td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-info">
+                                <td colspan="3" class="text-end"><strong>Total Sales for Date:</strong></td>
+                                <td class="text-end"><strong>@TotalSalesOfDate.ToString("C")</strong></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                }
+                break;
+
+            case "Customer":
+                <h4 class="mb-3">Total Sales by Customer</h4>
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Customer ID</th>
+                            <th>Customer Name</th>
+                            <th class="text-end">Total Amount Spent</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in customerSales)
+                        {
+                            <tr>
+                                <td>@item.CustomerId</td>
+                                <td>@item.CustomerName</td>
+                                <td class="text-end">@item.TotalAmountSpent.ToString("C")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                break;
+
+            case "Category":
+                <h4 class="mb-3">Total Sales by Category</h4>
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Category ID</th>
+                            <th>Category Name</th>
+                            <th class="text-end">Total Sales</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in categorySales)
+                        {
+                            <tr>
+                                <td>@item.CategoryId</td>
+                                <td>@item.CategoryName</td>
+                                <td class="text-end">@item.TotalSales.ToString("C")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                break;
+        }
     </div>
 </div>
 
 @code {
-    private bool isSalesByDate = false;
-    private bool isSalesByCustomer = false;
-    private bool isListByCategory = false;
-
-    private int CustomerID { get; set; }
-    private int CategoryID { get; set; }
-
-    private double TotalSalesOfDate = 0;
+    private string selectedReport = "Date"; // Default report to show
 
     private DateTime selectedDate;
-    private Customer selectedCustomer;
-    private Category selectedCategory;
-
-    private List<Customer> customers;
-    private List<Category> categories;
-
     private List<DailySalesReportItem> dailySales;
     private List<CustomerSalesReportItem> customerSales;
     private List<CategorySalesReportItem> categorySales;
 
+    private decimal TotalSalesOfDate => dailySales?.Sum(item => item.TotalSales) ?? 0;
+
     protected override async Task OnInitializedAsync()
     {
-        selectedDate = DateTime.Now;
-        customers = await customerService.GetAllCustomersAsync();
-        categories = await categoryService.GetAllCategoriesAsync();
+        selectedDate = DateTime.Today;
+        // Pre-load reports that don't need a parameter
         customerSales = await reportService.GetSalesByCustomerAsync();
         categorySales = await reportService.GetSalesByCategoryAsync();
     }
 
-
-    private void SalesByDateSelected()
+    private void SelectReport(string reportName)
     {
-        isSalesByDate = true;
-        isSalesByCustomer = false;
-        isListByCategory = false;
-    }
-    private async Task SelectDate()
-    {
-        if (selectedDate != null)
-        {
-            dailySales = await reportService.GetSalesByDateAsync(selectedDate);
-        }
+        selectedReport = reportName;
+        dailySales = null; // Clear daily sales when switching reports
     }
 
-
-    private async Task SalesByCustomerSelected()
+    private async Task GenerateDailyReport()
     {
-        isSalesByDate = false;
-        isSalesByCustomer = true;
-        isListByCategory = false;
-        
+        dailySales = await reportService.GetSalesByDateAsync(selectedDate);
     }
-    // private async Task SelectCustomer()
-    // {
-    //     if (selectedDate != null)
-    //     {
-    //         dailySales = await reportService.GetSalesByDateAsync(selectedDate);
-    //         dailySales.ForEach(e => TotalSalesOfDate += decimal.ToDouble(e.TotalSales));
-    //     }
-    // }
-
-    private void ListByCategorySelected()
-    {
-        isSalesByDate = false;
-        isSalesByCustomer = false;
-        isListByCategory = true;
-    }
-
-
 }

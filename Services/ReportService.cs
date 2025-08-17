@@ -1,17 +1,11 @@
 ﻿using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using VillageRentalManagementSystem.Models;
-using VillageRentalManagementSystem.Models.Reports; // Use the new namespace for our report models
+using VillageRentalManagementSystem.Models.Reports;
 
 namespace VillageRentalManagementSystem.Services
 {
-    /// <summary>
-    /// This service class handles generating reports by running complex queries
-    /// against the database.
-    /// </summary>
     public class ReportService
     {
         private readonly string _connectionString;
@@ -21,17 +15,9 @@ namespace VillageRentalManagementSystem.Services
             _connectionString = "Server=(localdb)\\MSSQLLocalDB;Database=VillageRentalDB;Trusted_Connection=True;";
         }
 
-        /// <summary>
-        /// Generates a sales report, summarizing total rental income per day
-        /// within a specified date range.
-        /// </summary>
         public async Task<List<DailySalesReportItem>> GetSalesByDateAsync(DateTime salesDate)
         {
-            List<DailySalesReportItem> reportData = new List<DailySalesReportItem>();
-            int rentalId = 0;
-            string cFirstName = "";
-            string cLastName = "";
-            double rTotalCost = 0;
+            var reportData = new List<DailySalesReportItem>();
 
             using (var connection = new SqlConnection(_connectionString))
             {
@@ -45,17 +31,15 @@ namespace VillageRentalManagementSystem.Services
                         COUNT(ri.Id) AS NumberOfItems,
                         r.TotalCost
                     FROM Rentals r
-                    JOIN Customers c
-                        ON r.CustomerId = c.Id
-                    JOIN RentalItems ri
-                        ON r.Id = ri.RentalId
+                    JOIN Customers c ON r.CustomerId = c.Id
+                    JOIN RentalItems ri ON r.Id = ri.RentalId
                     WHERE CAST(r.RentalDate AS DATE) = @SalesDate
-                        GROUP BY
-                            CAST(r.RentalDate AS DATE),
-                            r.Id,
-                            c.FirstName,
-                            c.LastName,
-                            r.TotalCost
+                    GROUP BY
+                        CAST(r.RentalDate AS DATE),
+                        r.Id,
+                        c.FirstName,
+                        c.LastName,
+                        r.TotalCost
                     ORDER BY r.Id;";
 
                 using (var command = new SqlCommand(query, connection))
@@ -82,17 +66,12 @@ namespace VillageRentalManagementSystem.Services
             return reportData;
         }
 
-        /// <summary>
-        /// Generates a report summarizing total sales for each customer.
-        /// </summary>
         public async Task<List<CustomerSalesReportItem>> GetSalesByCustomerAsync()
         {
             var reportData = new List<CustomerSalesReportItem>();
             using (var connection = new SqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
-                // This query joins Rentals and Customers to get the customer's name,
-                // then groups by customer to sum up their total spending.
                 var query = @"
                     SELECT 
                         c.Id AS CustomerId,
@@ -113,10 +92,6 @@ namespace VillageRentalManagementSystem.Services
                             {
                                 CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
                                 CustomerName = reader.GetString(reader.GetOrdinal("CustomerName")),
-                                // Get the column's position once to make the code cleaner
-
-                                // Use a ternary operator to check for DBNull
-                                // This says: "If the value is DBNull, use 0. Otherwise, get the decimal value."
                                 TotalAmountSpent = reader.IsDBNull(reader.GetOrdinal("TotalAmountSpent")) ? 0 : reader.GetDecimal(reader.GetOrdinal("TotalAmountSpent"))
                             });
                         }
@@ -126,17 +101,12 @@ namespace VillageRentalManagementSystem.Services
             return reportData;
         }
 
-        /// <summary>
-        /// Generates a report summarizing total sales for each equipment category.
-        /// </summary>
         public async Task<List<CategorySalesReportItem>> GetSalesByCategoryAsync()
         {
             var reportData = new List<CategorySalesReportItem>();
             using (var connection = new SqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
-                // This is the most complex query. It joins four tables together to link
-                // a rental's cost all the way back to the category of the equipment that was rented.
                 var query = @"
                     SELECT 
                         cat.Id AS CategoryId,

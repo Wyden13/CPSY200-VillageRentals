@@ -8,7 +8,6 @@
 
 <h3>Process New Rental</h3>
 
-<!-- This message will appear after a checkout attempt -->
 @if (!string.IsNullOrWhiteSpace(message))
 {
     <div class="alert alert-info" role="alert">
@@ -18,36 +17,33 @@
 
 <div class="container">
     <div class="row gx-5">
+        <!-- Left Column: Customer and Cart -->
         <div class="col-md-6">
 
-            <!-- Customer Search Section -->
+            <!-- Customer Search -->
             <h4>1. Find Customer</h4>
             <div class="card p-3 mb-4">
                 <div class="input-group">
                     <input type="text" class="form-control" placeholder="Enter Customer ID or Name..." @bind="customerSearchTerm" />
-                    <button class="btn btn-primary" @onclick="FindCustomer">Find Customer</button>
+                    <button class="btn btn-primary" @onclick="FindCustomer">Find</button>
                 </div>
 
-                <!-- Display Customer Details if Found -->
                 @if (selectedCustomer != null)
                 {
                     <hr />
                     <h5>Customer Details</h5>
                     <p>
                         <strong>Name:</strong> @selectedCustomer.FirstName @selectedCustomer.LastName<br />
-                        <strong>Email:</strong> @selectedCustomer.Email<br />
-                        <strong>Phone:</strong> @selectedCustomer.PhoneNumber
+                        <strong>Email:</strong> @selectedCustomer.Email
                     </p>
-
                     @if (selectedCustomer.IsBanned)
                     {
-                        <div class="alert alert-danger" role="alert">
-                            <strong>This customer is BANNED. Do not rent to them.</strong>
-                        </div>
+                        <div class="alert alert-danger"><strong>This customer is BANNED.</strong></div>
                     }
                 }
             </div>
 
+            <!-- Shopping Cart -->
             <h4>3. Shopping Cart</h4>
             <div class="card p-3">
                 @if (shoppingCart.Any())
@@ -56,6 +52,7 @@
                         <thead>
                             <tr>
                                 <th>Equipment</th>
+                                <th>Return Date</th>
                                 <th class="text-end">Cost</th>
                                 <th></th>
                             </tr>
@@ -65,6 +62,7 @@
                             {
                                 <tr>
                                     <td>@item.equipment.Name</td>
+                                    <td>@item.ExpectedReturnDate.ToShortDateString()</td>
                                     <td class="text-end">@item.rentalCost.ToString("C")</td>
                                     <td class="text-center">
                                         <button class="btn btn-sm btn-outline-danger" @onclick="() => RemoveFromCart(item)">X</button>
@@ -82,18 +80,19 @@
                 }
                 <hr />
                 <div class="d-grid gap-2">
-                    <button class="btn btn-success" @onclick="Checkout" disabled="@(!shoppingCart.Any() || selectedCustomer == null || selectedCustomer.IsBanned)">Go to Checkout</button>
+                    <button class="btn btn-success" @onclick="Checkout" disabled="@(!shoppingCart.Any() || selectedCustomer == null || selectedCustomer.IsBanned)">Create Rental</button>
                     <button class="btn btn-danger" @onclick="ClearCart" disabled="@(!shoppingCart.Any())">Clear Cart</button>
                 </div>
             </div>
         </div>
 
+        <!-- Right Column: Equipment Search -->
         <div class="col-md-6">
             <h4>2. Find Equipment</h4>
             <div class="card p-3">
                 <div class="input-group">
                     <input type="text" class="form-control" placeholder="Enter Equipment ID or Name..." @bind="equipmentSearchTerm" />
-                    <button class="btn btn-primary" @onclick="FindEquipment">Find Equipment</button>
+                    <button class="btn btn-primary" @onclick="FindEquipment">Find</button>
                 </div>
 
                 @if (foundEquipment != null)
@@ -102,23 +101,24 @@
                     <h5>Equipment Details</h5>
                     <p>
                         <strong>Name:</strong> @foundEquipment.Name<br />
-                        <strong>Description:</strong> @foundEquipment.Description<br />
-                        <strong>Daily Cost:</strong> @foundEquipment.DailyRentalCost.ToString("C")<br />
-                        <div>
-                            <label>Return Date:</label>
-                            <input type="date" @bind="selectedDate" class="form-control" />
-                        </div>
+                        <strong>Daily Cost:</strong> @foundEquipment.DailyRentalCost.ToString("C")
                     </p>
 
                     @if (foundEquipment.IsAvailable)
                     {
-                        <button class="btn btn-success" @onclick="AddToCart">Add to Cart</button>
+                        <div class="row align-items-end">
+                            <div class="col">
+                                <label>Return Date:</label>
+                                <input type="date" class="form-control" @bind="itemReturnDate" />
+                            </div>
+                            <div class="col-auto">
+                                <button class="btn btn-success" @onclick="AddToCart">Add to Cart</button>
+                            </div>
+                        </div>
                     }
                     else
                     {
-                        <div class="alert alert-warning" role="alert">
-                            This item is currently unavailable for rent.
-                        </div>
+                        <div class="alert alert-warning">This item is currently unavailable.</div>
                     }
                 }
             </div>
@@ -126,47 +126,40 @@
     </div>
 </div>
 
-
 @code {
-    private Customer? selectedCustomer = new();
-    private Equipment? foundEquipment = new();
-    private List<RentalItem> shoppingCart = new List<RentalItem>();
-    private string customerSearchTerm= "";
+    private Customer? selectedCustomer;
+    private Equipment? foundEquipment;
+    private List<RentalItem> shoppingCart = new();
+    private string customerSearchTerm = "";
     private string equipmentSearchTerm = "";
     private string message = "";
 
-    private DateTime selectedDate;
+    private DateTime itemReturnDate;
 
     private double TotalCost => shoppingCart.Sum(item => item.rentalCost);
 
     protected override void OnInitialized()
     {
-        selectedDate = DateTime.Now;    
+        itemReturnDate = DateTime.Today.AddDays(1);
     }
 
     private async Task FindCustomer()
     {
-        message = string.Empty; // Clear previous messages
+        message = string.Empty;
         if (!string.IsNullOrWhiteSpace(customerSearchTerm))
         {
             selectedCustomer = await customerService.FindCustomerAsync(customerSearchTerm);
-            if (selectedCustomer == null)
-            {
-                message = "Customer not found.";
-            }
+            if (selectedCustomer == null) message = "Customer not found.";
         }
     }
 
     private async Task FindEquipment()
     {
-        message = string.Empty; // Clear previous messages
+        message = string.Empty;
         if (!string.IsNullOrWhiteSpace(equipmentSearchTerm))
         {
             foundEquipment = await equipmentService.FindEquipmentAsync(equipmentSearchTerm);
-            if (foundEquipment == null)
-            {
-                message = "Equipment not found.";
-            }
+            if (foundEquipment == null) message = "Equipment not found.";
         }
     }
 
@@ -174,36 +167,44 @@
     {
         if (selectedCustomer == null)
         {
-            message = "Error: Please select a customer before adding items to the cart.";
+            message = "Please select a customer first.";
             return;
         }
         if (selectedCustomer.IsBanned)
         {
-            message = "Error: Cannot add items for a banned customer.";
+            message = "Cannot rent to a banned customer.";
             return;
         }
+        if (itemReturnDate.Date < DateTime.Today.Date)
+        {
+            message = "Return date cannot be in the past.";
+            return;
+        }
+
         if (foundEquipment != null && foundEquipment.IsAvailable)
         {
+            var rentalDays = (itemReturnDate.Date - DateTime.Today.Date).TotalDays;
+            if (rentalDays < 1) rentalDays = 1;
+
             var rentalItem = new RentalItem
             {
                 equipment = foundEquipment,
-                rentalCost = foundEquipment.DailyRentalCost,
-                returnDAte = selectedDate
+                ExpectedReturnDate = itemReturnDate, // Corrected property name
+                rentalCost = foundEquipment.DailyRentalCost * rentalDays
             };
+
             shoppingCart.Add(rentalItem);
+            message = $"{rentalItem.equipment.Name} added to cart!";
+
             foundEquipment = null;
             equipmentSearchTerm = string.Empty;
-            message = $"{rentalItem.equipment.Name} added to cart!";
         }
     }
 
     private void RemoveFromCart(RentalItem itemToRemove)
     {
-        if (itemToRemove != null)
-        {
-            shoppingCart.Remove(itemToRemove);
-            message = $"{itemToRemove.equipment.Name} removed from cart.";
-        }
+        shoppingCart.Remove(itemToRemove);
+        message = $"{itemToRemove.equipment.Name} removed from cart.";
     }
 
     private void ClearCart()
@@ -214,8 +215,14 @@
 
     private async Task Checkout()
     {
-        if (selectedCustomer == null) return;
-        var newRental = new Rental(0, selectedCustomer, shoppingCart);
+        if (selectedCustomer == null || !shoppingCart.Any()) return;
+
+        var newRental = new Rental
+        {
+            customer = selectedCustomer,
+            items = shoppingCart,
+            ExpectedReturnDate = shoppingCart.Max(item => item.ExpectedReturnDate) 
+        };
 
         bool success = await rentalService.CreateRentalAsync(newRental);
 
@@ -226,7 +233,7 @@
         }
         else
         {
-            message = "There was an error creating the rental. Please try again.";
+            message = "Error creating the rental. Please try again.";
         }
     }
 
