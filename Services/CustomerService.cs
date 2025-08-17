@@ -1,9 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using VillageRentalManagementSystem.Models;
-using VillageRentalManagementSystem;
 
 namespace VillageRentalManagementSystem.Services
 {
@@ -13,11 +11,7 @@ namespace VillageRentalManagementSystem.Services
 
         public CustomerService()
         {
-#pragma warning disable CS8601 // Possible null reference assignment.
-            //_connectionString = configuration.GetConnectionString("DefaultConnection");
             _connectionString = "Server=(localdb)\\MSSQLLocalDB;Database=VillageRentalDB;Trusted_Connection=True;";
-
-#pragma warning restore CS8601 // Possible null reference assignment.
         }
 
         public async Task<Customer> FindCustomerAsync(string searchTerm)
@@ -113,7 +107,55 @@ namespace VillageRentalManagementSystem.Services
                     command.Parameters.AddWithValue("@DiscountRate", customer.DiscountRate);
 
                     int result = await command.ExecuteNonQueryAsync();
-                    return result > 0; 
+                    return result > 0;
+                }
+            }
+        }
+
+        // NEW: Method to update an existing customer
+        public async Task<bool> UpdateCustomerAsync(Customer customer)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+                var query = @"
+                    UPDATE Customers 
+                    SET FirstName = @FirstName, 
+                        LastName = @LastName, 
+                        PhoneNumber = @PhoneNumber, 
+                        Email = @Email, 
+                        IsBanned = @IsBanned, 
+                        DiscountRate = @DiscountRate
+                    WHERE Id = @Id";
+
+                using (var command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@Id", customer.Id);
+                    command.Parameters.AddWithValue("@FirstName", customer.FirstName);
+                    command.Parameters.AddWithValue("@LastName", customer.LastName);
+                    command.Parameters.AddWithValue("@PhoneNumber", customer.PhoneNumber);
+                    command.Parameters.AddWithValue("@Email", customer.Email);
+                    command.Parameters.AddWithValue("@IsBanned", customer.IsBanned);
+                    command.Parameters.AddWithValue("@DiscountRate", customer.DiscountRate);
+
+                    int result = await command.ExecuteNonQueryAsync();
+                    return result > 0;
+                }
+            }
+        }
+
+        // NEW: Method to delete a customer
+        public async Task<bool> DeleteCustomerAsync(int customerId)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+                var query = "DELETE FROM Customers WHERE Id = @Id";
+                using (var command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@Id", customerId);
+                    int result = await command.ExecuteNonQueryAsync();
+                    return result > 0;
                 }
             }
         }

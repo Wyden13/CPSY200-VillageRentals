@@ -5,10 +5,13 @@
 
 <h3>Customer List</h3>
 
+@if (!string.IsNullOrEmpty(message))
+{
+    <div class="alert alert-success">@message</div>
+}
+
 <div class="container">
-    <div class="row justify-content-between mb-3">
-        <div class="col-8">
-        </div>
+    <div class="row justify-content-end mb-3">
         <div class="col-4">
             <button class="btn btn-primary w-100" @onclick="ShowAddCustomerModal">Add Customer</button>
         </div>
@@ -16,14 +19,14 @@
     <table class="table table-hover">
         <thead>
             <tr>
-                <th scope="col">ID</th>
-                <th scope="col">First Name</th>
-                <th scope="col">Last Name</th>
-                <th scope="col">Phone</th>
-                <th scope="col">Email</th>
-                <th scope="col">Discount Rate</th>
-                <th scope="col">Status</th>
-                <th scope="col">Actions</th>
+                <th>ID</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>Discount</th>
+                <th>Status</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -32,19 +35,27 @@
                 @foreach (var customer in customers)
                 {
                     <tr>
-                        <th scope="row">@customer.Id</th>
+                        <td>@customer.Id</td>
                         <td>@customer.FirstName</td>
                         <td>@customer.LastName</td>
                         <td>@customer.PhoneNumber</td>
                         <td>@customer.Email</td>
                         <td>@customer.DiscountRate %</td>
-                        <td>@(customer.IsBanned ? "Banned" : "Active")</td>
+                        <td>
+                            <span class="badge @(customer.IsBanned ? "bg-danger" : "bg-success")">
+                                @(customer.IsBanned ? "Banned" : "Active")
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-secondary" @onclick="() => ShowEditCustomerModal(customer)">Edit</button>
+                            <button class="btn btn-sm btn-danger" @onclick="() => DeleteCustomer(customer.Id)">Delete</button>
+                        </td>
                     </tr>
                 }
             }
             else
             {
-                <tr><td colspan="12" class="text-center">No customer exists</td></tr>
+                <tr><td colspan="8" class="text-center">No customers found.</td></tr>
             }
         </tbody>
     </table>
@@ -57,7 +68,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Add Customer</h5>
+                    <h5 class="modal-title">@modalTitle</h5>
                     <button type="button" class="btn-close" @onclick="CloseCustomerModal"></button>
                 </div>
                 <div class="modal-body">
@@ -91,17 +102,20 @@
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" @onclick="CloseCustomerModal">Cancel</button>
-                    <button class="btn btn-primary" @onclick="AddCustomer">Add</button>
+                    <button class="btn btn-primary" @onclick="SaveCustomer">Save</button>
                 </div>
             </div>
         </div>
     </div>
     <div class="modal-backdrop show"></div>
 }
+
 @code {
     private List<Customer> customers = new();
     private Customer modalCustomer = new();
     private bool showCustomerModal = false;
+    private string modalTitle = "";
+    private string message = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -116,6 +130,24 @@
     private void ShowAddCustomerModal()
     {
         modalCustomer = new Customer();
+        modalTitle = "Add New Customer";
+        showCustomerModal = true;
+    }
+
+    private void ShowEditCustomerModal(Customer customerToEdit)
+    {
+        // Create a copy to avoid modifying the list directly
+        modalCustomer = new Customer
+        {
+            Id = customerToEdit.Id,
+            FirstName = customerToEdit.FirstName,
+            LastName = customerToEdit.LastName,
+            PhoneNumber = customerToEdit.PhoneNumber,
+            Email = customerToEdit.Email,
+            IsBanned = customerToEdit.IsBanned,
+            DiscountRate = customerToEdit.DiscountRate
+        };
+        modalTitle = $"Edit Customer #{customerToEdit.Id}";
         showCustomerModal = true;
     }
 
@@ -123,20 +155,42 @@
     {
         showCustomerModal = false;
     }
-    private async Task AddCustomer()
+
+    private async Task SaveCustomer()
     {
         if (string.IsNullOrWhiteSpace(modalCustomer.FirstName) ||
-            string.IsNullOrWhiteSpace(modalCustomer.LastName) ||
-            string.IsNullOrWhiteSpace(modalCustomer.PhoneNumber) ||
-            string.IsNullOrWhiteSpace(modalCustomer.Email))
+            string.IsNullOrWhiteSpace(modalCustomer.LastName))
         {
+            message = "First and Last name are required.";
             return;
         }
-        var successCheck = await customerService.AddCustomerAsync(modalCustomer);
-        if (successCheck)
+
+        bool success;
+        if (modalCustomer.Id == 0) // New customer
+        {
+            success = await customerService.AddCustomerAsync(modalCustomer);
+            message = success ? "Customer added successfully." : "Failed to add customer.";
+        }
+        else // Existing customer
+        {
+            success = await customerService.UpdateCustomerAsync(modalCustomer);
+            message = success ? "Customer updated successfully." : "Failed to update customer.";
+        }
+
+        if (success)
         {
             await LoadCustomers();
-            showCustomerModal = false;
+            CloseCustomerModal();
+        }
+    }
+
+    private async Task DeleteCustomer(int customerId)
+    {
+        bool success = await customerService.DeleteCustomerAsync(customerId);
+        message = success ? "Customer deleted successfully." : "Failed to delete customer.";
+        if (success)
+        {
+            await LoadCustomers();
         }
     }
 }
