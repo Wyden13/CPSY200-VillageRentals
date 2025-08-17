@@ -103,7 +103,11 @@
                     <p>
                         <strong>Name:</strong> @foundEquipment.Name<br />
                         <strong>Description:</strong> @foundEquipment.Description<br />
-                        <strong>Daily Cost:</strong> @foundEquipment.DailyRentalCost.ToString("C")
+                        <strong>Daily Cost:</strong> @foundEquipment.DailyRentalCost.ToString("C")<br />
+                        <div>
+                            <label>Return Date:</label>
+                            <input type="date" @bind="selectedDate" class="form-control" />
+                        </div>
                     </p>
 
                     @if (foundEquipment.IsAvailable)
@@ -131,9 +135,14 @@
     private string equipmentSearchTerm = "";
     private string message = "";
 
+    private DateTime selectedDate;
+
     private double TotalCost => shoppingCart.Sum(item => item.rentalCost);
 
-    protected override void OnInitialized() { }
+    protected override void OnInitialized()
+    {
+        selectedDate = DateTime.Now;    
+    }
 
     private async Task FindCustomer()
     {
@@ -178,7 +187,8 @@
             var rentalItem = new RentalItem
             {
                 equipment = foundEquipment,
-                rentalCost = foundEquipment.DailyRentalCost
+                rentalCost = foundEquipment.DailyRentalCost,
+                returnDAte = selectedDate
             };
             shoppingCart.Add(rentalItem);
             foundEquipment = null;

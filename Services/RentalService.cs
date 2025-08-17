@@ -29,8 +29,8 @@ namespace VillageRentalManagementSystem.Services
                     // 'SCOPE_IDENTITY()' is a special SQL command. It gets the ID of the
                     // row we just inserted.
                     var rentalInsertQuery = @"
-                        INSERT INTO Rentals (CustomerId, RentalDate, TotalCost) 
-                        VALUES (@CustomerId, @RentalDate, @TotalCost);
+                        INSERT INTO Rentals (CustomerId, RentalDate, ExpectedReturnDate, TotalCost) 
+                        VALUES (@CustomerId, @RentalDate, @ExpectedReturnDate, @TotalCost);
                         SELECT SCOPE_IDENTITY();";
 
                     int newRentalId;
@@ -38,6 +38,7 @@ namespace VillageRentalManagementSystem.Services
                     {
                         command.Parameters.AddWithValue("@CustomerId", rental.customer.Id);
                         command.Parameters.AddWithValue("@RentalDate", DateTime.Now);
+                        command.Parameters.AddWithValue("@ExpectedReturnDate", rental.items[0].returnDAte);
                         command.Parameters.AddWithValue("@TotalCost", rental.CalculateTotalCost());
                         var result = await command.ExecuteScalarAsync();
                         newRentalId = Convert.ToInt32(result);
@@ -142,7 +143,7 @@ namespace VillageRentalManagementSystem.Services
                                         Email = reader.GetString(reader.GetOrdinal("Email")),
                                     },
                                 RentalDate = reader.GetDateTime(reader.GetOrdinal("RentalDate")),
-                                ExpectedReturnDate = reader.GetDateTime(reader.GetOrdinal("ExpectedReturnDate"))
+                                ExpectedReturnDate = reader.IsDBNull(reader.GetOrdinal("ExpectedReturnDate")) ? DateTime.MaxValue : reader.GetDateTime(reader.GetOrdinal("ExpectedReturnDate"))
                             };
                             rental.TotalCost = (double)reader.GetDecimal(reader.GetOrdinal("TotalCost"));
                             rentalList.Add(rental);

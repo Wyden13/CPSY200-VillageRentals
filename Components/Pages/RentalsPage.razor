@@ -8,12 +8,6 @@
 
 
 <h3>Manage Rentals</h3>
-@if (!string.IsNullOrWhiteSpace(message))
-{
-    <div class="alert alert-info" role="alert">
-        @message
-    </div>
-}
 
 <div class="container">
     @* <div class="row mb-3">
@@ -45,7 +39,7 @@
                         <td>@rental.Id</td>
                         <td>@rental.customer.FirstName @rental.customer.LastName </td>
                         <td>@rental.customer.Email</td>
-                        <td>$@rental.TotalCost</td>
+                        <td>@rental.TotalCost.ToString("C")</td>
                         <td>@rental.RentalDate.ToShortDateString()</td>
                         <td>@rental.ExpectedReturnDate.ToShortDateString()</td>
                         <td>
@@ -144,6 +138,7 @@
                     message = "Equipment Returned successfully.";
                 }
             }
+            await App.Current.MainPage.DisplayAlert("Success!", message, "Ok");
         }
         catch(Exception e)
         {
