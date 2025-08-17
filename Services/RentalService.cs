@@ -81,7 +81,20 @@ namespace VillageRentalManagementSystem.Services
         }
         public async Task<bool> ReturnRentalAsync(int rentalId)
         {
-            var query = "UPDATE Rentals SET ActualReturnDate = @ReturnDate WHERE Id = @RentalId";
+            var query = @"
+                -- Update the rental's return date.
+                UPDATE Rentals 
+                SET ActualReturnDate = @ReturnDate 
+                WHERE Id = @RentalId;
+
+                -- Update the availability of the equipment from that rental.
+                UPDATE Equipment
+                SET IsAvailable = 1
+                WHERE Id IN (
+                    SELECT EquipmentId 
+                    FROM RentalItems 
+                    WHERE RentalId = @RentalId
+                );";
 
             using (var connection = new SqlConnection(connectionString))
             {
@@ -93,9 +106,10 @@ namespace VillageRentalManagementSystem.Services
 
                     await command.ExecuteNonQueryAsync();
                 }
+
             }
 
-            return false;
+            return true;
         }
 
         public async Task<List<Rental>> GetAllRentalAsync()
