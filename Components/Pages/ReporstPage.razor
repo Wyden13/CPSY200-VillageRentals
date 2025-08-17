@@ -8,9 +8,9 @@
 <div class="card">
     <div class="card-header">
         <div class="btn-group w-100" role="group">
-            <button type="button" class="btn @(selectedReport == "Date" ? "btn-primary" : "btn-outline-primary")" @onclick='() => SelectReport(" Date")'>Sales by Date</button>
-            <button type="button" class="btn @(selectedReport == "Customer" ? "btn-primary" : "btn-outline-primary")" @onclick='() => SelectReport(" Customer")'>Sales by Customer</button>
-            <button type="button" class="btn @(selectedReport == "Category" ? "btn-primary" : "btn-outline-primary")" @onclick='() => SelectReport(" Category")'>Sales by Category</button>
+            <button type="button" class="btn @(selectedReport == "Date" ? "btn-primary" : "btn-outline-primary")" @onclick='() => SelectReport("Date")'>Sales by Date</button>
+            <button type="button" class="btn @(selectedReport == "Customer" ? "btn-primary" : "btn-outline-primary")" @onclick='() => SelectReport("Customer")'>Sales by Customer</button>
+            <button type="button" class="btn @(selectedReport == "Category" ? "btn-primary" : "btn-outline-primary")" @onclick='() => SelectReport("Category")'>Sales by Category</button>
         </div>
     </div>
     <div class="card-body">
