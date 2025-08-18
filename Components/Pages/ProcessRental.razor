@@ -20,18 +20,19 @@
         <!-- Left Column: Customer and Cart -->
         <div class="col-md-6">
 
-            <!-- Customer Search -->
+            <!-- Customer Selection Section -->
             <h4>1. Find Customer</h4>
             <div class="card p-3 mb-4">
-                <div class="input-group">
-                    <input type="text" class="form-control" placeholder="Enter Customer ID or Name..." @bind="customerSearchTerm" />
-                    <button class="btn btn-primary" @onclick="FindCustomer">Find</button>
+                <div class="d-grid">
+                    <button class="btn btn-primary" @onclick="OpenCustomerModal">
+                        <i class="bi bi-people-fill me-2"></i> Browse Customers
+                    </button>
                 </div>
 
                 @if (selectedCustomer != null)
                 {
                     <hr />
-                    <h5>Customer Details</h5>
+                    <h5>Selected Customer</h5>
                     <p>
                         <strong>Name:</strong> @selectedCustomer.FirstName @selectedCustomer.LastName<br />
                         <strong>Email:</strong> @selectedCustomer.Email
@@ -120,6 +121,53 @@
     </div>
 </div>
 
+<!-- Customer Selection Modal -->
+@if (showCustomerModal)
+{
+    <div class="modal show d-block" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Select Customer</h5>
+                    <button type="button" class="btn-close" @onclick="CloseCustomerModal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" class="form-control mb-3" placeholder="Search customers..." @oninput="FilterCustomers" />
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Status</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var customer in filteredCustomerList)
+                            {
+                                <tr>
+                                    <td>@customer.FirstName @customer.LastName</td>
+                                    <td>@customer.Email</td>
+                                    <td>
+                                        <span class="badge @(customer.IsBanned ? "bg-danger" : "bg-success")">
+                                            @(customer.IsBanned ? "Banned" : "Active")
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary" @onclick="() => SelectCustomer(customer)">Select</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop show"></div>
+}
+
+
 <!-- Equipment Selection Modal -->
 @if (showEquipmentModal)
 {
@@ -127,7 +175,7 @@
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Available Equipments</h5>
+                    <h5 class="modal-title">Available Equipment</h5>
                     <button type="button" class="btn-close" @onclick="CloseEquipmentModal"></button>
                 </div>
                 <div class="modal-body">
@@ -167,10 +215,15 @@
     private Customer? selectedCustomer;
     private Equipment? foundEquipment;
     private List<RentalItem> shoppingCart = new();
-    private string customerSearchTerm = "";
     private string message = "";
     private DateTime itemReturnDate;
     private double TotalCost => shoppingCart.Sum(item => item.rentalCost);
+
+    // For the customer modal
+    private bool showCustomerModal = false;
+    private List<Customer> allCustomers = new();
+    private List<Customer> filteredCustomerList = new();
+    private string customerSearchFilter = "";
 
     // For the equipment modal
     private bool showEquipmentModal = false;
@@ -183,16 +236,8 @@
         itemReturnDate = DateTime.Today.AddDays(1);
         allAvailableEquipment = await equipmentService.GetAllAvailableEquipmentAsync();
         filteredEquipmentList = allAvailableEquipment;
-    }
-
-    private async Task FindCustomer()
-    {
-        message = string.Empty;
-        if (!string.IsNullOrWhiteSpace(customerSearchTerm))
-        {
-            selectedCustomer = await customerService.FindCustomerAsync(customerSearchTerm);
-            if (selectedCustomer == null) message = "Customer not found.";
-        }
+        allCustomers = await customerService.GetAllCustomersAsync();
+        filteredCustomerList = allCustomers;
     }
 
     private void AddToCart()
@@ -231,15 +276,34 @@
         }
     }
 
-    private void OpenEquipmentModal()
+    // --- Customer Modal Methods ---
+    private void OpenCustomerModal() => showCustomerModal = true;
+    private void CloseCustomerModal() => showCustomerModal = false;
+
+    private void SelectCustomer(Customer customer)
     {
-        showEquipmentModal = true;
+        selectedCustomer = customer;
+        CloseCustomerModal();
     }
 
-    private void CloseEquipmentModal()
+    private void FilterCustomers(ChangeEventArgs e)
     {
-        showEquipmentModal = false;
+        customerSearchFilter = e.Value.ToString();
+        if (string.IsNullOrWhiteSpace(customerSearchFilter))
+        {
+            filteredCustomerList = allCustomers;
+        }
+        else
+        {
+            filteredCustomerList = allCustomers
+                .Where(c => (c.FirstName + " " + c.LastName).Contains(customerSearchFilter, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
     }
+
+    // --- Equipment Modal Methods ---
+    private void OpenEquipmentModal() => showEquipmentModal = true;
+    private void CloseEquipmentModal() => showEquipmentModal = false;
 
     private void SelectEquipment(Equipment equipment)
     {
@@ -290,7 +354,7 @@
         if (success)
         {
             message = $"Rental #{newRental.Id} created successfully for {selectedCustomer.FirstName}.";
-            ResetPage();
+            await ResetPage();
         }
         else
         {
@@ -301,11 +365,13 @@
     private async Task ResetPage()
     {
         selectedCustomer = null;
-        customerSearchTerm = string.Empty;
         foundEquipment = null;
         shoppingCart.Clear();
-        // Refresh the list of available equipment after a rental is created
+
+        // Refresh data that may have changed
         allAvailableEquipment = await equipmentService.GetAllAvailableEquipmentAsync();
         filteredEquipmentList = allAvailableEquipment;
+        allCustomers = await customerService.GetAllCustomersAsync();
+        filteredCustomerList = allCustomers;
     }
 }
