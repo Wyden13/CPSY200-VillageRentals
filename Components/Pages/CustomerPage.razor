@@ -186,11 +186,17 @@
 
     private async Task DeleteCustomer(int customerId)
     {
-        bool success = await customerService.DeleteCustomerAsync(customerId);
-        message = success ? "Customer deleted successfully." : "Failed to delete customer.";
-        if (success)
+        try
         {
-            await LoadCustomers();
+            bool success = await customerService.DeleteCustomerAsync(customerId);
+            message = success ? "Customer deleted successfully." : "Failed to delete customer.";
+            if (success)
+            {
+                await LoadCustomers();
+            }
+        } catch (Exception e)
+        {
+            await App.Current.MainPage.DisplayAlert("Error:", "Unable to delete customer becuse of they have a rental history", "Ok");
         }
     }
 }

@@ -193,14 +193,20 @@
     private async Task DeleteEquipment(Equipment equipment)
     {
         message = string.Empty;
+        var success = false;
         if (!equipment.IsAvailable)
         {
             message = "Error: Cannot delete equipment that is currently rented out.";
             return;
         }
-
-        var success = await equipmentService.DeleteEquipmentAsync(equipment.Id);
-        message = success ? "Equipment deleted successfully." : "Failed to delete equipment.";
+        try
+        {
+            success = await equipmentService.DeleteEquipmentAsync(equipment.Id);
+            message = success ? "Equipment deleted successfully." : "Failed to delete equipment.";
+        } catch(Exception e)
+        {
+            await App.Current.MainPage.DisplayAlert("Error:", "Unable to delete equipment becuse of it has a rental history.", "Ok");
+        }
 
         if (success)
         {
