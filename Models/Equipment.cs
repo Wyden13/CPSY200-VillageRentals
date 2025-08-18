@@ -15,6 +15,7 @@ namespace VillageRentalManagementSystem.Models
         public double DailyRentalCost { get; set; }
         public bool IsAvailable { get; set; }
         public Category Category { get; set; }
+        public bool IsDeleted { get; set; }
 
         public Equipment()
         {

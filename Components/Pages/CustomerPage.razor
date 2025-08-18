@@ -1,6 +1,8 @@
 ﻿@page "/customers"
+@using System.Text.RegularExpressions
 @using VillageRentalManagementSystem.Models
 @using VillageRentalManagementSystem.Services
+@using VillageRentalManagementSystem.Exceptions
 @inject CustomerService customerService
 
 <h3>Customer List</h3>
@@ -13,7 +15,9 @@
 <div class="container">
     <div class="row justify-content-end mb-3">
         <div class="col-4">
-            <button class="btn btn-primary w-100" @onclick="ShowAddCustomerModal">Add Customer</button>
+            <button class="btn btn-primary w-100" @onclick="ShowAddCustomerModal">
+                <i class="bi bi-person-plus-fill me-2"></i>Add Customer
+            </button>
         </div>
     </div>
     <table class="table table-hover">
@@ -47,8 +51,12 @@
                             </span>
                         </td>
                         <td>
-                            <button class="btn btn-sm btn-secondary" @onclick="() => ShowEditCustomerModal(customer)"><i class="bi bi-pencil-fill"></i></button>
-                            <button class="btn btn-sm btn-danger" @onclick="() => DeleteCustomer(customer.Id)"><i class="bi bi-trash-fill"></i></button>
+                            <button class="btn btn-sm btn-secondary" @onclick="() => ShowEditCustomerModal(customer)">
+                                <i class="bi bi-pencil-fill"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" @onclick="() => DeleteCustomer(customer.Id)">
+                                <i class="bi bi-trash-fill"></i>
+                            </button>
                         </td>
                     </tr>
                 }
@@ -72,6 +80,11 @@
                     <button type="button" class="btn-close" @onclick="CloseCustomerModal"></button>
                 </div>
                 <div class="modal-body">
+                    @if (!string.IsNullOrEmpty(modalErrorMessage))
+                    {
+                        <div class="alert alert-danger">@modalErrorMessage</div>
+                    }
+
                     <div class="mb-2">
                         <label>First Name</label>
                         <input class="form-control" @bind="modalCustomer.FirstName" />
@@ -116,6 +129,10 @@
     private bool showCustomerModal = false;
     private string modalTitle = "";
     private string message = "";
+    private bool isError = false;
+
+    // --- NEW: Message for inside the modal ---
+    private string modalErrorMessage = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -131,12 +148,12 @@
     {
         modalCustomer = new Customer();
         modalTitle = "Add New Customer";
+        modalErrorMessage = ""; 
         showCustomerModal = true;
     }
 
     private void ShowEditCustomerModal(Customer customerToEdit)
     {
-        // Create a copy to avoid modifying the list directly
         modalCustomer = new Customer
         {
             Id = customerToEdit.Id,
@@ -148,6 +165,7 @@
             DiscountRate = customerToEdit.DiscountRate
         };
         modalTitle = $"Edit Customer #{customerToEdit.Id}";
+        modalErrorMessage = ""; 
         showCustomerModal = true;
     }
 
@@ -158,45 +176,72 @@
 
     private async Task SaveCustomer()
     {
-        if (string.IsNullOrWhiteSpace(modalCustomer.FirstName) ||
-            string.IsNullOrWhiteSpace(modalCustomer.LastName))
+        message = "";
+        isError = false;
+        modalErrorMessage = "";
+
+        if (string.IsNullOrWhiteSpace(modalCustomer.FirstName) || string.IsNullOrWhiteSpace(modalCustomer.LastName))
         {
-            message = "First and Last name are required.";
+            modalErrorMessage = "First and Last name are required.";
             return;
         }
 
-        bool success;
-        if (modalCustomer.Id == 0) // New customer
+        var emailRegex = new Regex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", RegexOptions.IgnoreCase);
+        if (string.IsNullOrWhiteSpace(modalCustomer.Email) || !emailRegex.IsMatch(modalCustomer.Email))
         {
-            success = await customerService.AddCustomerAsync(modalCustomer);
-            message = success ? "Customer added successfully." : "Failed to add customer.";
-        }
-        else // Existing customer
-        {
-            success = await customerService.UpdateCustomerAsync(modalCustomer);
-            message = success ? "Customer updated successfully." : "Failed to update customer.";
+            modalErrorMessage = "Invalid email format. Please use a valid email address (e.g., user@example.com).";
+            return;
         }
 
-        if (success)
+        var phoneRegex = new Regex(@"^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$");
+        if (string.IsNullOrWhiteSpace(modalCustomer.PhoneNumber) || !phoneRegex.IsMatch(modalCustomer.PhoneNumber))
         {
-            await LoadCustomers();
-            CloseCustomerModal();
+            modalErrorMessage = "Invalid phone number format. Please use a valid 10-digit phone number (e.g., 555-555-5555).";
+            return;
+        }
+
+        try
+        {
+            bool success;
+            if (modalCustomer.Id == 0)
+            {
+                success = await customerService.AddCustomerAsync(modalCustomer);
+                message = success ? "Customer added successfully." : "Failed to add customer.";
+            }
+            else
+            {
+                success = await customerService.UpdateCustomerAsync(modalCustomer);
+                message = success ? "Customer updated successfully." : "Failed to update customer.";
+            }
+
+            if (success)
+            {
+                await LoadCustomers();
+                CloseCustomerModal();
+            }
+            else
+            {
+                isError = true;
+            }
+        }
+        catch (InvalidFormatException ex)
+        {
+            modalErrorMessage = ex.Message;
+        }
+        catch (Exception)
+        {
+            modalErrorMessage = "An unexpected error occurred. Please try again.";
         }
     }
 
     private async Task DeleteCustomer(int customerId)
     {
-        try
+        bool success = await customerService.DeleteCustomerAsync(customerId);
+        message = success ? "Customer deleted successfully." : "Failed to delete customer.";
+        isError = !success;
+        if (success)
         {
-            bool success = await customerService.DeleteCustomerAsync(customerId);
-            message = success ? "Customer deleted successfully." : "Failed to delete customer.";
-            if (success)
-            {
-                await LoadCustomers();
-            }
-        } catch (Exception e)
-        {
-            await App.Current.MainPage.DisplayAlert("Error:", "Unable to delete customer becuse of they have a rental history", "Ok");
+            await LoadCustomers();
         }
     }
 }

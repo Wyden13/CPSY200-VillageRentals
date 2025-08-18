@@ -21,7 +21,8 @@ CREATE TABLE Customers (
     PhoneNumber NVARCHAR(20),
     Email NVARCHAR(100) UNIQUE,
     IsBanned BIT NOT NULL DEFAULT 0,
-    DiscountRate DECIMAL(5, 2) NOT NULL DEFAULT 0.00
+    DiscountRate DECIMAL(5, 2) NOT NULL DEFAULT 0.00,
+    IsDeleted BIT NOT NULL DEFAULT 0 -- New: For soft deletes
 );
 
 CREATE TABLE Categories (
@@ -35,7 +36,8 @@ CREATE TABLE Equipment (
     Description NVARCHAR(500),
     DailyRentalCost DECIMAL(10, 2) NOT NULL,
     IsAvailable BIT NOT NULL DEFAULT 1,
-    CategoryId INT
+    CategoryId INT,
+    IsDeleted BIT NOT NULL DEFAULT 0 -- New: For soft deletes
 );
 
 CREATE TABLE Rentals (
@@ -46,13 +48,12 @@ CREATE TABLE Rentals (
     TotalCost DECIMAL(10, 2)
 );
 
--- CORRECTED RentalItems table
 CREATE TABLE RentalItems (
     Id INT PRIMARY KEY IDENTITY(1,1),
     RentalId INT NOT NULL,
     EquipmentId INT NOT NULL,
     RentalCost DECIMAL(10, 2) NOT NULL,
-    ExpectedReturnDate DATETIME NOT NULL, -- <<< THIS COLUMN IS NOW ADDED
+    ExpectedReturnDate DATETIME NOT NULL,
     IsReturned BIT NOT NULL DEFAULT 0,
     ActualReturnDate DATETIME NULL
 );
