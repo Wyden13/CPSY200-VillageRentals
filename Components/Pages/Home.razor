@@ -1,5 +1,103 @@
 ﻿@page "/"
 
-<h1>Hello, world!</h1>
+<PageTitle>Home - Village Rentals</PageTitle>
 
-Welcome to your new app.
+<div class="container-fluid">
+    <div class="hero-section text-center">
+        <h1>Welcome to Village Rentals</h1>
+        <p class="lead">Your one-stop solution for managing equipment, customers, and rentals efficiently.</p>
+    </div>
+
+    <div class="row g-4 justify-content-center">
+        <!-- Process Rental Card -->
+        <div class="col-md-6 col-lg-4">
+            <NavLink href="process-rental" class="card-link">
+                <div class="card home-card h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-receipt-cutoff card-icon"></i>
+                        <h5 class="card-title">Process a New Rental</h5>
+                        <p class="card-text">Create and manage new rental transactions for customers.</p>
+                    </div>
+                </div>
+            </NavLink>
+        </div>
+
+        <!-- Manage Customers Card -->
+        <div class="col-md-6 col-lg-4">
+            <NavLink href="customers" class="card-link">
+                <div class="card home-card h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-people-fill card-icon"></i>
+                        <h5 class="card-title">Manage Customers</h5>
+                        <p class="card-text">Add, view, and update customer information.</p>
+                    </div>
+                </div>
+            </NavLink>
+        </div>
+
+        <!-- Manage Equipment Card -->
+        <div class="col-md-6 col-lg-4">
+            <NavLink href="equipments" class="card-link">
+                <div class="card home-card h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-tools card-icon"></i>
+                        <h5 class="card-title">Manage Equipment</h5>
+                        <p class="card-text">Browse and maintain the equipment inventory.</p>
+                    </div>
+                </div>
+            </NavLink>
+        </div>
+
+        <!-- View Reports Card -->
+        <div class="col-md-6 col-lg-4">
+            <NavLink href="reports-page" class="card-link">
+                <div class="card home-card h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-bar-chart-line-fill card-icon"></i>
+                        <h5 class="card-title">View Reports</h5>
+                        <p class="card-text">Generate sales and inventory reports.</p>
+                    </div>
+                </div>
+            </NavLink>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hero-section {
+        padding: 3rem 1rem;
+        margin-bottom: 2rem;
+        background-color: rgba(255, 255, 255, 0.5);
+        border-radius: 8px;
+    }
+
+    .home-card {
+        border: 1px solid var(--top-row-bg);
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+
+        .home-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border-color: var(--primary-button-bg);
+        }
+
+    .card-icon {
+        font-size: 3rem;
+        color: var(--primary-button-bg);
+        margin-bottom: 1rem;
+    }
+
+    .card-title {
+        color: var(--sidebar-bg);
+        font-weight: bold;
+    }
+
+    .card-link {
+        text-decoration: none;
+        color: inherit;
+    }
+</style>
+
+@code {
+}
